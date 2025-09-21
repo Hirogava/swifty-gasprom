@@ -42,6 +42,9 @@ require (
 
 require (
 	github.com/gin-gonic/gin v1.11.0
+	github.com/golang-jwt/jwt v3.2.2+incompatible
+	github.com/golang-jwt/jwt/v5 v5.3.0
+	github.com/google/uuid v1.6.0
 	golang.org/x/sys v0.35.0 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 )

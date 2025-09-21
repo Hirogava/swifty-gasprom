@@ -1,0 +1,72 @@
+package auth
+
+import (
+	"database/sql"
+	"os"
+	"time"
+
+	authModels "github.com/Hirogava/swifty-gasprom/backend/internal/models/auth"
+	"github.com/Hirogava/swifty-gasprom/backend/internal/repository/postgres"
+
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
+)
+
+var secret = os.Getenv("JWT_SECRET")
+
+func ParseToken(tokenString string) (*jwt.Token, error) {
+	if tokenString == "" {
+		return nil, jwt.ErrTokenMalformed
+	} else {
+		return jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+			return []byte(secret), nil
+		})
+	}
+}
+
+func GenerateRefreshToken(manager *postgres.Manager, userId string) (string, error) {
+	token := uuid.New().String()
+
+	err := manager.SaveRefreshToken(token, userId)
+	if err != nil {
+		return "", err
+	}
+	return token, nil
+}
+
+func GenerateAccessToken(claims jwt.MapClaims) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString([]byte(secret))
+}
+
+func AddAccessTime() int64 {
+	return time.Now().Add(15 * time.Minute).Unix()
+}
+
+func ValidateRefreshToken(manager *postgres.Manager, userId string) (authModels.RefreshToken, error) {
+	token, err := manager.GetRefreshToken(userId)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return authModels.RefreshToken{}, jwt.ErrTokenExpired
+		}
+		return token, err
+	}
+
+	if time.Now().After(token.ExpiredAt) {
+		if err := manager.DeleteRefreshToken(userId, token.Token); err != nil {
+			return authModels.RefreshToken{}, err
+		} else {
+			return authModels.RefreshToken{}, jwt.ErrTokenExpired
+		}
+	}
+	return token, nil
+}
+
+func GetClaims(tokenString string) (jwt.MapClaims, error) { 
+	claims := jwt.MapClaims{}
+	_, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+		return []byte(secret), nil
+	})
+
+	return claims, err
+}
