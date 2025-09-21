@@ -1,0 +1,19 @@
+import '../../../../../routing/routers.dart';
+
+enum NavItem {
+  work(Routers.work, 'assets/icons/work.svg', 'Работа'),
+  risk(Routers.risk, 'assets/icons/risks.svg', 'Риск'),
+  home(Routers.home, 'assets/icons/home.svg', 'Главная'),
+  news(Routers.news, 'assets/icons/news.svg', 'Новости'),
+  life(Routers.life, 'assets/icons/life.svg', 'Жизнь');
+
+  final String route;
+  final String assetPath;
+  final String label;
+
+  const NavItem(this.route, this.assetPath, this.label);
+
+  static final _routeMap = {for (var item in NavItem.values) item.route: item};
+
+  static NavItem? fromRoute(String route) => _routeMap[route];
+}
