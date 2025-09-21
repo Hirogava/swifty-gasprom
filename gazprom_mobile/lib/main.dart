@@ -36,16 +36,16 @@ class _WebViewScreenState extends State<WebViewScreen> {
     super.initState();
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..loadRequest(Uri.parse('http://192.168.31.35:8080'));
+      ..loadRequest(Uri.parse('http://172.20.10.3:8080'));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-          title: Text(widget.title, style: TextStyle(color: AppColors.white)),
-          backgroundColor: AppColors.lightBlueAccent,
-        ),
+      // appBar: AppBar(
+      //     title: Text(widget.title, style: TextStyle(color: AppColors.white)),
+      //     backgroundColor: AppColors.lightBlueAccent,
+      //   ),
       body: WebViewWidget(controller: _controller),
     );
   }
