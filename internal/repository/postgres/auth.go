@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"database/sql"
 	"time"
 
 	authModels "github.com/Hirogava/swifty-gasprom/backend/internal/models/auth"
@@ -35,4 +36,21 @@ func (manager *Manager) UpdateRefreshToken(userId string, token string) error {
 	}
 
 	return nil
+}
+
+func (manager *Manager) FindOrCreateUser(bankUser authModels.BankUser) (authModels.User, error) {
+	var user authModels.User
+
+	if err := manager.Conn.QueryRow(`SELECT id from user WHERE bank_user_id = $1`, bankUser.BankUserID).Scan(&user.ID); err != nil {
+		if err == sql.ErrNoRows {
+			err := manager.Conn.QueryRow(`INSERT INTO user (bank_user_id) VALUES ($1)`, bankUser.BankUserID).Scan(&user.ID)
+			if err != nil {
+				return authModels.User{}, err
+			}
+		} else {
+			return authModels.User{}, err
+		}
+	}
+
+	return user, nil
 }
