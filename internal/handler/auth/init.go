@@ -21,7 +21,7 @@ func InitAuthHandlers(r *gin.Engine, manager *postgres.Manager) {
 	}
 
 	secureV1 := r.Group("/api/v1")
-	r.Use(middleware.AuthMiddleware())
+	secureV1.Use(middleware.AuthMiddleware())
 	{
 		secureV1.POST("/refresh", func(c *gin.Context) {
 			RefreshToken(c, manager)
