@@ -47,6 +47,8 @@ func Login(c *gin.Context, manager *postgres.Manager) {
 		return
 	}
 
+	c.Set("userID", user.ID)
+
 	var refreshToken string
 	token, err := tokens.ValidateRefreshToken(manager, user.ID)
 	if err != nil {
