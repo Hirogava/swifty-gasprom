@@ -95,11 +95,14 @@ CREATE TABLE "user_progress" (
 );
 
 CREATE TABLE "user_assets" (
-  "id" serial PRIMARY KEY,
   "user_id" UUID NOT NULL,
+  "market_id" integer NOT NULL
+);
+
+CREATE TABLE "life_market" (
+  "id" serial PRIMARY KEY,
   "name" varchar(100),
-  "effect_duration" integer,
-  "expires_at" timestamp NOT NULL
+  "effect_duration" integer
 );
 
 COMMENT ON COLUMN "user_career"."career_level" IS 'Must be 1 to 5';
@@ -125,3 +128,5 @@ ALTER TABLE "current_progress_news" ADD FOREIGN KEY ("user_id") REFERENCES "user
 ALTER TABLE "user_progress" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("id");
 
 ALTER TABLE "user_assets" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("id");
+
+ALTER TABLE "user_assets" ADD FOREIGN KEY ("market_id") REFERENCES "life_market" ("id");
