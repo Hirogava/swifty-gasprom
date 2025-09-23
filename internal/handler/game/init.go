@@ -5,6 +5,7 @@ import (
 
 	"github.com/Hirogava/swifty-gasprom/backend/internal/handler/middleware"
 	"github.com/Hirogava/swifty-gasprom/backend/internal/repository/postgres"
+	dbErrors "github.com/Hirogava/swifty-gasprom/backend/internal/errors/db"
 	service "github.com/Hirogava/swifty-gasprom/backend/internal/service/game"
 
 	"github.com/gin-gonic/gin"
@@ -39,4 +40,22 @@ func StartGame(c *gin.Context, manager *postgres.Manager) {
 	})
 }
 
-func GetUserProgress(c *gin.Context, manager *postgres.Manager) {}
+func GetUserProgress(c *gin.Context, manager *postgres.Manager) {
+	userID := c.Param("userID")
+
+	game, err := manager.GetUserGameInfo(userID)
+	switch err {
+	case nil:
+		c.JSON(http.StatusOK, gin.H{
+			"game": game,
+		})
+	case dbErrors.ErrNotFound:
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": "Game not found",
+		})
+	default:
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+	}
+}
