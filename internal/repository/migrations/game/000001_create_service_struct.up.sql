@@ -1,14 +1,8 @@
-CREATE TYPE "statuses" AS ENUM (
-  'expired',
-  'pending',
-  'claimed'
-);
-
 CREATE TYPE "event_type" AS ENUM (
-  'news',
-  'life',
-  'risk',
-  'reward'
+  'crypto',
+  'stocks',
+  'bets',
+  'questionable_projects'
 );
 
 CREATE TYPE "news_type" AS ENUM (

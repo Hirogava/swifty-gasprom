@@ -1,3 +1,9 @@
+CREATE TYPE "statuses" AS ENUM (
+  'expired',
+  'pending',
+  'claimed'
+);
+
 CREATE TYPE "bank_product_type" AS ENUM (
   'credit_card',
   'debit_card'

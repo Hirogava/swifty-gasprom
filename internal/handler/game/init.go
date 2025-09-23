@@ -17,6 +17,9 @@ func InitGameHandlers(r *gin.Engine, manager *postgres.Manager) {
 		v1.GET("/start", func(c *gin.Context) {
 			StartGame(c, manager)
 		})
+		v1.GET("/progress", func(c *gin.Context) {
+			GetUserProgress(c, manager)
+		})
 	}
 }
 
@@ -35,3 +38,5 @@ func StartGame(c *gin.Context, manager *postgres.Manager) {
 		"game": game,
 	})
 }
+
+func GetUserProgress(c *gin.Context, manager *postgres.Manager) {}
