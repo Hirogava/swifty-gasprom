@@ -48,18 +48,25 @@ CREATE TABLE "scenarios" (
   "id" serial PRIMARY KEY,
   "version" integer NOT NULL,
   "title" varchar(150),
-  "description" text
+  "min_price" decimal(10,2),
+  "max_price" decimal(10,2),
+  "start_win_chance" integer,
+  "start_lose_chance" integer,
+  "max_win" decimal(10,2),
+  "max_lose" decimal(10,2),
+  "start_price" decimal(10,2)
 );
 
 CREATE TABLE "events" (
   "id" serial PRIMARY KEY,
+  "user_id" UUID NOT NULL,
   "scenario_id" integer NOT NULL,
   "name" varchar(100),
   "type" event_type NOT NULL,
-  "effect_money" decimal(10,2),
-  "effect_happiness" integer,
-  "effect_health" integer,
-  "probability" decimal(3,2)
+  "price" decimal(10,2),
+  "win_chance" integer,
+  "lose_chance" integer,
+  "month" integer
 );
 
 CREATE TABLE "news" (
@@ -112,6 +119,8 @@ ALTER TABLE "careers" ADD FOREIGN KEY ("field_id") REFERENCES "career_fields" ("
 ALTER TABLE "user_career" ADD FOREIGN KEY ("career_id") REFERENCES "careers" ("id");
 
 ALTER TABLE "user_career" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("id");
+
+ALTER TABLE "events" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("id");
 
 ALTER TABLE "events" ADD FOREIGN KEY ("scenario_id") REFERENCES "scenarios" ("id");
 
