@@ -5,6 +5,14 @@ CREATE TYPE "risk_type" AS ENUM (
   'questionable_projects'
 );
 
+CREATE TYPE "career_category" AS ENUM (
+  'it_and_technology',
+  'engineering_and_manufacturing',
+  'medicine_and_healthcare',
+  'marketing_and_sales',
+  'working_professions'
+);
+
 CREATE TYPE "news_type" AS ENUM (
   'economic',
   'political',
@@ -35,20 +43,20 @@ CREATE TABLE "configs" (
 
 CREATE TABLE "careers" (
   "id" serial PRIMARY KEY,
-  "field_id" integer NOT NULL,
-  "name" varchar(150) NOT NULL,
-  "salary_growth_factor" decimal(10,2),
-  "happiness_penalty_factor" decimal(10,2)
-);
-
-CREATE TABLE "career_fields" (
-  "id" serial PRIMARY KEY,
-  "name" varchar(100)
+  "name" varchar(100),
+  "career_type" career_category,
+  "career_level" integer,
+  "career_graid" integer,
+  "min_salary" decimal(10,2),
+  "max_salary" decimal(10,2),
+  "happiness_penalty_factor" integer
 );
 
 CREATE TABLE "user_career" (
   "taked_at" timestamp NOT NULL DEFAULT (now()),
   "career_level" integer,
+  "career_graid" integer,
+  "salary" decimal(10,2) NOT NULL,
   "career_id" integer NOT NULL,
   "user_id" UUID NOT NULL
 );
