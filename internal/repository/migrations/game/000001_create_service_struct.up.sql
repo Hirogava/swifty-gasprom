@@ -1,4 +1,4 @@
-CREATE TYPE "event_type" AS ENUM (
+CREATE TYPE "risk_type" AS ENUM (
   'crypto',
   'stocks',
   'bets',
@@ -17,6 +17,15 @@ CREATE TYPE "user_statuses" AS ENUM (
   'active',
   'burnout',
   'bankrupt'
+);
+
+CREATE TYPE "life_market_category" AS ENUM (
+  'entertainment_and_recreation',
+  'appliances_and_gadgets',
+  'gifts_and_social_interaction',
+  'education_and_self_development',
+  'health_and_care',
+  'everyday_joys'
 );
 
 CREATE TABLE "configs" (
@@ -57,12 +66,12 @@ CREATE TABLE "scenarios" (
   "start_price" decimal(10,2)
 );
 
-CREATE TABLE "events" (
+CREATE TABLE "risk" (
   "id" serial PRIMARY KEY,
   "user_id" UUID NOT NULL,
   "scenario_id" integer NOT NULL,
   "name" varchar(100),
-  "type" event_type NOT NULL,
+  "type" risk_type NOT NULL,
   "price" decimal(10,2),
   "win_chance" integer,
   "lose_chance" integer,
@@ -103,7 +112,18 @@ CREATE TABLE "user_assets" (
 CREATE TABLE "life_market" (
   "id" serial PRIMARY KEY,
   "name" varchar(100),
+  "cost" decimal(10,2),
+  "category" life_market_category,
   "effect_duration" integer
+);
+
+CREATE TABLE "events" (
+  "id" serial PRIMARY KEY,
+  "name" varchar(255),
+  "event_text" text,
+  "capital_percent" integer,
+  "to_agree" integer,
+  "refuse" integer
 );
 
 COMMENT ON COLUMN "user_career"."career_level" IS 'Must be 1 to 5';
@@ -120,9 +140,9 @@ ALTER TABLE "user_career" ADD FOREIGN KEY ("career_id") REFERENCES "careers" ("i
 
 ALTER TABLE "user_career" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("id");
 
-ALTER TABLE "events" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("id");
+ALTER TABLE "risk" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("id");
 
-ALTER TABLE "events" ADD FOREIGN KEY ("scenario_id") REFERENCES "scenarios" ("id");
+ALTER TABLE "risk" ADD FOREIGN KEY ("scenario_id") REFERENCES "scenarios" ("id");
 
 ALTER TABLE "current_progress_news" ADD FOREIGN KEY ("news_id") REFERENCES "news" ("id");
 

@@ -27,3 +27,20 @@ type UserGameInfo struct {
 	News News
 	Career Career
 }
+
+type Event struct {
+	ID int64 `json:"id"`
+	Name string `json:"name"`
+	EventText string `json:"event_text"`
+	CapitalPercent int `json:"capital_percent"`
+	ToAgree int `json:"to_agree"`
+	Refuse int `json:"refuse"`
+}
+
+type LifeMarketItem struct {
+	ID int64 `json:"id"`
+	Name string `json:"name"`
+	Cost float64 `json:"cost"`
+	Category LifeMarketCategory `json:"category"`
+	HappinessEffect int `json:"happiness_effect"`
+}
