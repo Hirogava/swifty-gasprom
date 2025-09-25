@@ -13,3 +13,11 @@ func StartGame(userID string) *gameModels.UserProgress {
 
 	return &progress
 }
+
+func ArithmeticMeanSalary(minSalary, maxSalary float64) float64 {
+	if minSalary == maxSalary {
+		return minSalary
+	} else {
+		return (minSalary + maxSalary) / 2
+	}
+}

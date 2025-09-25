@@ -17,9 +17,10 @@ type News struct {
 
 type Career struct {
 	ID int64 `json:"id"`
-	Level int `json:"level"`
+	Grade int `json:"grade"`
+	Salary float64 `json:"salary"`
 	Name string `json:"name"`
-	CareerField string `json:"career_field"`
+	CareerType CareerType `json:"career_type"`
 }
 
 type UserGameInfo struct {
@@ -42,5 +43,15 @@ type LifeMarketItem struct {
 	Name string `json:"name"`
 	Cost float64 `json:"cost"`
 	Category LifeMarketCategory `json:"category"`
+	HappinessEffect int `json:"happiness_effect"`
+}
+
+type Vacancy struct {
+	ID int64 `json:"id"`
+	Name string `json:"name"`
+	Type CareerType `json:"type"`
+	CareerLevel int `json:"career_level"`
+	CareerGrade int `json:"career_grade"`
+	Salary float64 `json:"salary"`
 	HappinessEffect int `json:"happiness_effect"`
 }

@@ -20,6 +20,7 @@ func BuyLifeMarketItem(c *gin.Context, manager *postgres.Manager) {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
+		return
 	}
 
 	userID := c.Param("userID")

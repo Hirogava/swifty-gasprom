@@ -69,12 +69,14 @@ func EditUserBankBonus(c *gin.Context, manager *postgres.Manager) {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
+		return
 	}
 
 	if err := manager.UpdateUserBonusStatusType(req); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
+		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{

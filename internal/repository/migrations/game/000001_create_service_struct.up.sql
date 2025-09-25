@@ -38,7 +38,7 @@ CREATE TYPE "life_market_category" AS ENUM (
 
 CREATE TABLE "configs" (
   "id" serial PRIMARY KEY,
-  "global_settings" jsonb NOT NULL
+  "month_inflation" decimal(10,2)
 );
 
 CREATE TABLE "careers" (
@@ -46,7 +46,7 @@ CREATE TABLE "careers" (
   "name" varchar(100),
   "career_type" career_category,
   "career_level" integer,
-  "career_graid" integer,
+  "career_grade" integer,
   "min_salary" decimal(10,2),
   "max_salary" decimal(10,2),
   "happiness_penalty_factor" integer
@@ -55,7 +55,7 @@ CREATE TABLE "careers" (
 CREATE TABLE "user_career" (
   "taked_at" timestamp NOT NULL DEFAULT (now()),
   "career_level" integer,
-  "career_graid" integer,
+  "career_grade" integer,
   "salary" decimal(10,2) NOT NULL,
   "career_id" integer NOT NULL,
   "user_id" UUID NOT NULL
@@ -161,3 +161,5 @@ ALTER TABLE "user_progress" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("id")
 ALTER TABLE "user_assets" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("id");
 
 ALTER TABLE "user_assets" ADD FOREIGN KEY ("market_id") REFERENCES "life_market" ("id");
+
+CREATE INDEX ON "careers" ("name");

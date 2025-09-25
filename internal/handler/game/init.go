@@ -39,14 +39,20 @@ func InitGameHandlers(r *gin.Engine, manager *postgres.Manager) {
 		v1.GET("/vacancy", func(c *gin.Context) {
 			GetVacancy(c, manager)
 		})
-		v1.POST("/vacancy/:id", func(c *gin.Context) {
+		v1.GET("/player/vacancy", func(c *gin.Context) {
+			GetPlayerVacancy(c, manager)
+		})
+		v1.POST("/player/vacancy", func(c *gin.Context) {
 			SetPlayerVacancy(c, manager)
 		})
-		v1.PUT("/vacancy/:id", func(c *gin.Context) {
+		v1.PUT("/player/vacancy/:name", func(c *gin.Context) {
 			UpdatePlayerVacancy(c, manager)
 		})
-		v1.DELETE("/vacancy/:id", func(c *gin.Context) {
+		v1.DELETE("/player/vacancy/:id", func(c *gin.Context) {
 			DeletePlayerVacancy(c, manager)
+		})
+		v1.PUT("/player/vacancy/grade/:id", func (c *gin.Context)  {
+			UpdatePlayerVacancyGrade(c, manager)
 		})
 	}
 }
@@ -60,6 +66,7 @@ func StartGame(c *gin.Context, manager *postgres.Manager) {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
+		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
@@ -76,10 +83,12 @@ func GetUserProgress(c *gin.Context, manager *postgres.Manager) {
 		c.JSON(http.StatusOK, gin.H{
 			"game": game,
 		})
+		return
 	case dbErrors.ErrNotFound:
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": "Game not found",
 		})
+		return
 	default:
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),

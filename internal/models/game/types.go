@@ -19,3 +19,13 @@ const (
 	HealthAndCare LifeMarketCategory = "health_and_care"
 	EverydayJoys LifeMarketCategory = "everyday_joys"
 )
+
+type CareerType string
+
+const (
+	ITAndTechnology CareerType = "it_and_technology"
+	EngineeringAndManufacturing CareerType = "engineering_and_manufacturing"
+	MedicineAndHealthcare CareerType = "medicine_and_healthcare"
+	MarketingAndSales CareerType = "marketing_and_sales"
+	WorkingProfessions CareerType = "working_professions"
+)

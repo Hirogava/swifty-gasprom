@@ -15,6 +15,7 @@ func GetRandomEvent(c *gin.Context, manager *postgres.Manager) {
 		c.JSON(http.StatusOK, gin.H{
 			"event": event,
 		})
+		return
 	default:
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),

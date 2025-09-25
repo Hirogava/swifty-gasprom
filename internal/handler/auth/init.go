@@ -126,7 +126,7 @@ func Logout(c *gin.Context, manager *postgres.Manager) {
 	userId := c.GetString("userID")
 
 	token, err := tokens.ValidateRefreshToken(manager, userId)
-		if err != nil {
+	if err != nil {
 		switch err {
 			case jwt.ErrTokenExpired:
 				c.JSON(http.StatusUnauthorized, gin.H{"error": "Refresh token expired"})
