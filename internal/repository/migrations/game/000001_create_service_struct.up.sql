@@ -116,7 +116,7 @@ CREATE TABLE "news" (
 );
 
 CREATE TABLE "current_progress_news" (
-  "created_at" timestamp NOT NULL DEFAULT (now()),
+  "month" integer DEFAULT 1,
   "news_id" integer NOT NULL,
   "user_id" UUID NOT NULL
 );
@@ -167,6 +167,8 @@ COMMENT ON COLUMN "user_progress"."happiness" IS 'Must be 0 to 100';
 COMMENT ON COLUMN "user_progress"."health" IS 'Must be 0 to 100';
 
 COMMENT ON COLUMN "user_progress"."month" IS 'Must be 1 to 60';
+
+COMMENT ON COLUMN "current_progress_news"."month" IS 'Must be 1 to 60';
 
 ALTER TABLE "careers" ADD FOREIGN KEY ("field_id") REFERENCES "career_fields" ("id");
 

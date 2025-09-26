@@ -13,6 +13,7 @@ type News struct {
 	ID int64 `json:"id"`
 	Title string `json:"title"`
 	Text string `json:"text"`
+	Type NewsType `json:"type"`
 }
 
 type Career struct {

@@ -727,3 +727,72 @@ func (manager *Manager) GetRiskItemsByType(itemType string, userID string) ([]ga
 
 	return items, nil
 }
+
+func (manager *Manager) GetPlayerNews(userID string) ([]gameModels.News, error) {
+	var news []gameModels.News
+
+	rows, err := manager.Conn.Query(`
+		SELECT 
+			n.id,
+			n.news_title,
+			n.news_text
+		FROM current_progress_news cpn
+		JOIN news n ON n.id = cpn.news_id
+		WHERE cpn.user_id = $1
+		AND cpn.month = (
+			SELECT MAX(month) 
+			FROM current_progress_news 
+			WHERE user_id = $1
+		)
+		ORDER BY n.id
+		`, userID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, dbErrors.ErrNotFound
+		} else {
+			return nil, err
+		}
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var item gameModels.News
+
+		if err := rows.Scan(&item.ID, &item.Title, &item.Text); err != nil {
+			return nil, err
+		}
+
+		news = append(news, item)
+	}
+
+	return news, nil
+}
+
+func (manager *Manager) GetCurrentNews(newsID int, userID string) (*gameModels.News, error) {
+	var news gameModels.News
+
+	if err := manager.Conn.QueryRow(`
+			SELECT 
+				n.id,
+				n.type,
+				n.news_title,
+				n.news_text
+			FROM current_progress_news cpn
+			JOIN news n ON n.id = cpn.news_id
+			WHERE cpn.user_id = $1
+			AND cpn.news_id = $2
+			AND cpn.month = (
+				SELECT MAX(month) 
+				FROM current_progress_news 
+				WHERE user_id = $1
+			)
+			`, userID, newsID).Scan(&news.ID, &news.Type, &news.Title, &news.Text); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, dbErrors.ErrNotFound
+		} else {
+			return nil, err
+		}
+	}
+
+	return &news, nil
+}

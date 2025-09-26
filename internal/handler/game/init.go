@@ -69,6 +69,12 @@ func InitGameHandlers(r *gin.Engine, manager *postgres.Manager) {
 		v1.GET("/player/risk", func(c *gin.Context) {
 			GetPlayerRiskItems(c, manager)
 		})
+		v1.GET("/player/news", func(c *gin.Context) {
+			GetPlayerNews(c, manager)
+		})
+		v1.GET("/player/news/:id", func(c *gin.Context) {
+			GetCurrentNews(c, manager)
+		})
 	}
 }
 

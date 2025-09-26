@@ -38,3 +38,12 @@ const (
 	Crypto RiskType = "crypto"
 	Stocks RiskType = "stocks"
 )
+
+type NewsType string
+
+const (
+	Economic NewsType = "economic"
+	Political NewsType = "political"
+	Corporate NewsType = "corporate"
+	Useless NewsType = "useless"
+)
