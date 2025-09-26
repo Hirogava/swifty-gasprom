@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/Hirogava/swifty-gasprom/backend/internal/config/logger"
 	dbErrors "github.com/Hirogava/swifty-gasprom/backend/internal/errors/db"
 	gameErrors "github.com/Hirogava/swifty-gasprom/backend/internal/errors/game"
 	gameModels "github.com/Hirogava/swifty-gasprom/backend/internal/models/game"
@@ -14,9 +15,11 @@ import (
 )
 
 func BuyRiskItem(c *gin.Context, manager *postgres.Manager) {
+	logger.Logger.Debug("Buying risk item", "user_id", c.GetString("userID"), "ip", c.ClientIP())
 	var envelope gameModels.Envelope
 
 	if err := c.ShouldBindJSON(&envelope); err != nil {
+		logger.Logger.Error("Failed to bind JSON", "user_id", c.GetString("userID"), "ip", c.ClientIP(), "error", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err,
 		})
@@ -25,6 +28,7 @@ func BuyRiskItem(c *gin.Context, manager *postgres.Manager) {
 
 	msg, err := gameService.EnvelopeRiskStruct(&envelope)
 	if err != nil {
+		logger.Logger.Error("Failed to envelope risk struct", "user_id", c.GetString("userID"), "ip", c.ClientIP(), "error", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err,
 		})
@@ -43,21 +47,25 @@ func BuyRiskItem(c *gin.Context, manager *postgres.Manager) {
 	}
 	switch err {
 	case nil:
+		logger.Logger.Debug("Risk item bought successfully", "user_id", c.GetString("userID"), "ip", c.ClientIP())
 		c.JSON(http.StatusOK, gin.H{
 			"status": "success",
 		})
 		return
 	case gameErrors.ErrNotEnoughMoney:
+		logger.Logger.Error("Not enough money", "user_id", c.GetString("userID"), "ip", c.ClientIP(), "error", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
 		return
 	case dbErrors.ErrNotFound:
+		logger.Logger.Error("Risk item not found", "user_id", c.GetString("userID"), "ip", c.ClientIP(), "error", err.Error())
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": err.Error(),
 		})
 		return
 	default:
+		logger.Logger.Error("Failed to buy risk item", "user_id", c.GetString("userID"), "ip", c.ClientIP(), "error", err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
@@ -65,19 +73,23 @@ func BuyRiskItem(c *gin.Context, manager *postgres.Manager) {
 }
 
 func GetRiskItems(c *gin.Context, manager *postgres.Manager) {
+	logger.Logger.Debug("Getting risk items", "user_id", c.GetString("userID"), "ip", c.ClientIP())
 	risk, err := manager.GetRiskItems(c.GetString("userID"))
 	switch err {
 	case nil:
+		logger.Logger.Debug("Risk items retrieved successfully", "user_id", c.GetString("userID"), "ip", c.ClientIP())
 		c.JSON(http.StatusOK, gin.H{
 			"risk": risk,
 		})
 		return
 	case dbErrors.ErrNotFound:
+		logger.Logger.Error("Risk items not found", "user_id", c.GetString("userID"), "ip", c.ClientIP(), "error", err.Error())
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": err.Error(),
 		})
 		return
 	default:
+		logger.Logger.Error("Failed to get risk items", "user_id", c.GetString("userID"), "ip", c.ClientIP(), "error", err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
@@ -85,19 +97,23 @@ func GetRiskItems(c *gin.Context, manager *postgres.Manager) {
 }
 
 func GetPlayerRiskItems(c *gin.Context, manager *postgres.Manager) {
+	logger.Logger.Debug("Getting player risk items", "user_id", c.GetString("userID"), "ip", c.ClientIP())
 	items, err := manager.GetPlayerRiskItems(c.GetString("userID"))
 	switch err {
 	case nil:
+		logger.Logger.Debug("Player risk items retrieved successfully", "user_id", c.GetString("userID"), "ip", c.ClientIP())
 		c.JSON(http.StatusOK, gin.H{
 			"items": items,
 		})
 		return
 	case dbErrors.ErrNotFound:
+		logger.Logger.Error("Player risk items not found", "user_id", c.GetString("userID"), "ip", c.ClientIP(), "error", err.Error())
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": err.Error(),
 		})
 		return
 	default:
+		logger.Logger.Error("Failed to get player risk items", "user_id", c.GetString("userID"), "ip", c.ClientIP(), "error", err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
@@ -107,6 +123,7 @@ func GetPlayerRiskItems(c *gin.Context, manager *postgres.Manager) {
 func GetRiskItem(c *gin.Context, manager *postgres.Manager) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
+		logger.Logger.Error("Failed to convert ID", "user_id", c.GetString("userID"), "ip", c.ClientIP(), "error", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
@@ -116,16 +133,19 @@ func GetRiskItem(c *gin.Context, manager *postgres.Manager) {
 	item, err := manager.GetRiskItem(id, c.GetString("userID"), c.Param("type"))
 	switch err {
 	case nil:
+		logger.Logger.Debug("Risk item retrieved successfully", "user_id", c.GetString("userID"), "ip", c.ClientIP())
 		c.JSON(http.StatusOK, gin.H{
 			"item": item,
 		})
 		return
 	case dbErrors.ErrNotFound:
+		logger.Logger.Error("Risk item not found", "user_id", c.GetString("userID"), "ip", c.ClientIP(), "error", err.Error())
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": err.Error(),
 		})
 		return
 	default:
+		logger.Logger.Error("Failed to get risk item", "user_id", c.GetString("userID"), "ip", c.ClientIP(), "error", err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
@@ -133,19 +153,23 @@ func GetRiskItem(c *gin.Context, manager *postgres.Manager) {
 }
 
 func GetRiskItemsByType(c *gin.Context, manager *postgres.Manager) {
+	logger.Logger.Debug("Getting risk items by type", "user_id", c.GetString("userID"), "ip", c.ClientIP())
 	items, err := manager.GetRiskItemsByType(c.Param("type"), c.GetString("userID"))
 	switch err {
 	case nil:
+		logger.Logger.Debug("Risk items by type retrieved successfully", "user_id", c.GetString("userID"), "ip", c.ClientIP())
 		c.JSON(http.StatusOK, gin.H{
 			"items": items,
 		})
 		return
 	case dbErrors.ErrNotFound:
+		logger.Logger.Error("Risk items by type not found", "user_id", c.GetString("userID"), "ip", c.ClientIP(), "error", err.Error())
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": err.Error(),
 		})
 		return
 	default:
+		logger.Logger.Error("Failed to get risk items by type", "user_id", c.GetString("userID"), "ip", c.ClientIP(), "error", err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})

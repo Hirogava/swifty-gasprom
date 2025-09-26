@@ -3,6 +3,7 @@ package auth
 import (
 	"net/http"
 
+	"github.com/Hirogava/swifty-gasprom/backend/internal/config/logger"
 	"github.com/Hirogava/swifty-gasprom/backend/internal/handler/middleware"
 	authModels "github.com/Hirogava/swifty-gasprom/backend/internal/models/auth"
 	"github.com/Hirogava/swifty-gasprom/backend/internal/repository/postgres"
@@ -33,19 +34,27 @@ func InitAuthHandlers(r *gin.Engine, manager *postgres.Manager) {
 }
 
 func Login(c *gin.Context, manager *postgres.Manager) {
-	var req authModels.BankUser 
+	logger.Logger.Info("Login attempt", "ip", c.ClientIP())
+
+	var req authModels.BankUser
 
 	if err := c.ShouldBindJSON(&req); err != nil {
+		logger.Logger.Warn("Invalid login request", "ip", c.ClientIP(), "error", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
+	logger.Logger.Debug("Processing login for bank user", "bank_user_id", req.BankUserID, "ip", c.ClientIP())
+
 	// Псевдо-логика проверки данных
 	user, err := manager.FindOrCreateUser(req)
 	if err != nil {
+		logger.Logger.Error("Failed to find or create user", "bank_user_id", req.BankUserID, "ip", c.ClientIP(), "error", err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
+	logger.Logger.Info("User found/created successfully", "user_id", user.ID, "bank_user_id", req.BankUserID, "ip", c.ClientIP())
 
 	c.Set("userID", user.ID)
 
@@ -53,12 +62,15 @@ func Login(c *gin.Context, manager *postgres.Manager) {
 	token, err := tokens.ValidateRefreshToken(manager, user.ID)
 	if err != nil {
 		if err == jwt.ErrTokenExpired {
+			logger.Logger.Debug("Refresh token expired, generating new one", "user_id", user.ID)
 			refreshToken, err = tokens.GenerateRefreshToken(manager, user.ID)
 			if err != nil {
+				logger.Logger.Error("Failed to generate refresh token", "user_id", user.ID, "error", err.Error())
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}
 		} else {
+			logger.Logger.Error("Failed to validate refresh token", "user_id", user.ID, "error", err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
@@ -75,33 +87,40 @@ func Login(c *gin.Context, manager *postgres.Manager) {
 	}
 
 	if user.Token.AccessToken, err = tokens.GenerateAccessToken(claims); err != nil {
+		logger.Logger.Error("Failed to generate access token", "user_id", user.ID, "error", err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"": err.Error()})
 		return
 	}
 
+	logger.Logger.Info("Login successful", "user_id", user.ID, "bank_user_id", req.BankUserID, "ip", c.ClientIP())
+
 	c.JSON(http.StatusOK, gin.H{
-		"user" : user,
+		"user": user,
 	})
 }
 
 func RefreshToken(c *gin.Context, manager *postgres.Manager) {
+	userId := c.GetString("userID")
+	logger.Logger.Info("Token refresh attempt", "user_id", userId, "ip", c.ClientIP())
+
 	var t authModels.Tokens
 	if err := c.ShouldBindJSON(&t); err != nil {
+		logger.Logger.Warn("Invalid refresh token request", "user_id", userId, "ip", c.ClientIP(), "error", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	userId := c.GetString("userID")
-
 	refreshToken, err := tokens.ValidateRefreshToken(manager, userId)
 	if err != nil {
 		switch err {
-			case jwt.ErrTokenExpired:
-				c.JSON(http.StatusUnauthorized, gin.H{"error": "Refresh token expired"})
-				return
-			default:
-				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-				return
+		case jwt.ErrTokenExpired:
+			logger.Logger.Warn("Refresh token expired", "user_id", userId, "ip", c.ClientIP())
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Refresh token expired"})
+			return
+		default:
+			logger.Logger.Error("Failed to validate refresh token", "user_id", userId, "ip", c.ClientIP(), "error", err.Error())
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
 		}
 	}
 	t.RefreshToken = refreshToken.Token
@@ -112,35 +131,44 @@ func RefreshToken(c *gin.Context, manager *postgres.Manager) {
 	}
 
 	if t.AccessToken, err = tokens.GenerateAccessToken(claims); err != nil {
+		logger.Logger.Error("Failed to generate new access token", "user_id", userId, "ip", c.ClientIP(), "error", err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
+	logger.Logger.Info("Token refresh successful", "user_id", userId, "ip", c.ClientIP())
+
 	c.JSON(http.StatusOK, gin.H{
-		"access_token": t.AccessToken,
+		"access_token":  t.AccessToken,
 		"refresh_token": t.RefreshToken,
 	})
 }
 
 func Logout(c *gin.Context, manager *postgres.Manager) {
 	userId := c.GetString("userID")
+	logger.Logger.Info("Logout attempt", "user_id", userId, "ip", c.ClientIP())
 
 	token, err := tokens.ValidateRefreshToken(manager, userId)
 	if err != nil {
 		switch err {
-			case jwt.ErrTokenExpired:
-				c.JSON(http.StatusUnauthorized, gin.H{"error": "Refresh token expired"})
-				return
-			default:
-				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-				return
+		case jwt.ErrTokenExpired:
+			logger.Logger.Warn("Refresh token expired during logout", "user_id", userId, "ip", c.ClientIP())
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Refresh token expired"})
+			return
+		default:
+			logger.Logger.Error("Failed to validate refresh token during logout", "user_id", userId, "ip", c.ClientIP(), "error", err.Error())
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
 		}
 	}
 
 	if err := manager.DeleteRefreshToken(userId, token.Token); err != nil {
+		logger.Logger.Error("Failed to delete refresh token", "user_id", userId, "ip", c.ClientIP(), "error", err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
+	logger.Logger.Info("Logout successful", "user_id", userId, "ip", c.ClientIP())
 
 	c.JSON(http.StatusOK, gin.H{
 		"logout": "success",

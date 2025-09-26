@@ -5,6 +5,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/Hirogava/swifty-gasprom/backend/internal/config/logger"
 	authModels "github.com/Hirogava/swifty-gasprom/backend/internal/models/auth"
 	"github.com/Hirogava/swifty-gasprom/backend/internal/repository/postgres"
 
@@ -25,18 +26,32 @@ func ParseToken(tokenString string) (*jwt.Token, error) {
 }
 
 func GenerateRefreshToken(manager *postgres.Manager, userId string) (string, error) {
+	logger.Logger.Debug("Generating refresh token", "user_id", userId)
+
 	token := uuid.New().String()
 
 	err := manager.SaveRefreshToken(token, userId)
 	if err != nil {
+		logger.Logger.Error("Failed to save refresh token", "user_id", userId, "error", err.Error())
 		return "", err
 	}
+
+	logger.Logger.Debug("Refresh token generated and saved", "user_id", userId)
 	return token, nil
 }
 
 func GenerateAccessToken(claims jwt.MapClaims) (string, error) {
+	logger.Logger.Debug("Generating access token", "user_id", claims["id"])
+
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString([]byte(secret))
+	accessToken, err := token.SignedString([]byte(secret))
+	if err != nil {
+		logger.Logger.Error("Failed to sign access token", "user_id", claims["id"], "error", err.Error())
+		return "", err
+	}
+
+	logger.Logger.Debug("Access token generated successfully", "user_id", claims["id"])
+	return accessToken, nil
 }
 
 func AddAccessTime() int64 {
@@ -62,7 +77,7 @@ func ValidateRefreshToken(manager *postgres.Manager, userId string) (authModels.
 	return token, nil
 }
 
-func GetClaims(tokenString string) (jwt.MapClaims, error) { 
+func GetClaims(tokenString string) (jwt.MapClaims, error) {
 	claims := jwt.MapClaims{}
 	_, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
 		return []byte(secret), nil
