@@ -49,7 +49,8 @@ CREATE TABLE "careers" (
   "career_grade" integer,
   "min_salary" decimal(10,2),
   "max_salary" decimal(10,2),
-  "happiness_penalty_factor" integer
+  "happiness_penalty_factor" integer,
+  "months_to_grade" integer
 );
 
 CREATE TABLE "user_career" (
@@ -65,6 +66,8 @@ CREATE TABLE "scenarios" (
   "id" serial PRIMARY KEY,
   "version" integer NOT NULL,
   "title" varchar(150),
+  "type" risk_type,
+  "crypto_category" integer,
   "min_price" decimal(10,2),
   "max_price" decimal(10,2),
   "start_win_chance" integer,
@@ -80,6 +83,23 @@ CREATE TABLE "risk" (
   "scenario_id" integer NOT NULL,
   "name" varchar(100),
   "type" risk_type NOT NULL,
+  "price" decimal(10,2),
+  "win_chance" integer,
+  "lose_chance" integer
+);
+
+CREATE TABLE "crypto" (
+  "id" serial PRIMARY KEY,
+  "name" varchar(255)
+);
+
+CREATE TABLE "user_crypto_scenarios" (
+  "id" serial PRIMARY KEY,
+  name varchar(150),
+  "user_id" UUID NOT NULL,
+  "scenario_id" integer NOT NULL,
+  "crypto_category" integer NOT NULL,
+  "type" risk_type,
   "price" decimal(10,2),
   "win_chance" integer,
   "lose_chance" integer,
@@ -134,6 +154,12 @@ CREATE TABLE "events" (
   "refuse" integer
 );
 
+CREATE TABLE "user_buyed_risks" (
+  "user_id" UUID NOT NULL,
+  "risk_id" integer,
+  "crypto_id" integer
+);
+
 COMMENT ON COLUMN "user_career"."career_level" IS 'Must be 1 to 5';
 
 COMMENT ON COLUMN "user_progress"."happiness" IS 'Must be 0 to 100';
@@ -148,9 +174,21 @@ ALTER TABLE "user_career" ADD FOREIGN KEY ("career_id") REFERENCES "careers" ("i
 
 ALTER TABLE "user_career" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("id");
 
+ALTER TABLE "scenarios" ADD FOREIGN KEY ("crypto_category") REFERENCES "crypto" ("id");
+
 ALTER TABLE "risk" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("id");
 
 ALTER TABLE "risk" ADD FOREIGN KEY ("scenario_id") REFERENCES "scenarios" ("id");
+
+ALTER TABLE "risk" ADD FOREIGN KEY ("crypto_category") REFERENCES "crypto" ("id");
+
+ALTER TABLE "news" ADD FOREIGN KEY ("crypto_category") REFERENCES "crypto" ("id");
+
+ALTER TABLE "user_crypto_scenarios" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("id");
+
+ALTER TABLE "user_crypto_scenarios" ADD FOREIGN KEY ("scenario_id") REFERENCES "scenarios" ("id");
+
+ALTER TABLE "user_crypto_scenarios" ADD FOREIGN KEY ("crypto_category") REFERENCES "crypto" ("id");
 
 ALTER TABLE "current_progress_news" ADD FOREIGN KEY ("news_id") REFERENCES "news" ("id");
 
@@ -161,5 +199,11 @@ ALTER TABLE "user_progress" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("id")
 ALTER TABLE "user_assets" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("id");
 
 ALTER TABLE "user_assets" ADD FOREIGN KEY ("market_id") REFERENCES "life_market" ("id");
+
+ALTER TABLE "user_buyed_risks" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("id");
+
+ALTER TABLE "user_buyed_risks" ADD FOREIGN KEY ("risk_id") REFERENCES "risk" ("id");
+
+ALTER TABLE "user_buyed_risks" ADD FOREIGN KEY ("crypto_id") REFERENCES "user_crypto_scenarios" ("id");
 
 CREATE INDEX ON "careers" ("name");

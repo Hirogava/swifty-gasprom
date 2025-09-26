@@ -83,6 +83,7 @@ func (manager *Manager) GetUserBankBonuses(userId string) ([]bankModels.BankBonu
 			return []bankModels.BankBonus{}, err
 		}
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var bankBonus bankModels.BankBonus

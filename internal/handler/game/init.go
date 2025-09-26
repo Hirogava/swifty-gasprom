@@ -54,6 +54,21 @@ func InitGameHandlers(r *gin.Engine, manager *postgres.Manager) {
 		v1.PUT("/player/vacancy/grade/:id", func (c *gin.Context)  {
 			UpdatePlayerVacancyGrade(c, manager)
 		})
+		v1.POST("/risk", func (c *gin.Context) {
+			BuyRiskItem(c, manager)
+		})
+		v1.GET("/risk", func (c *gin.Context) {
+			GetRiskItems(c, manager)
+		})
+		v1.GET("/risk/:type", func(c *gin.Context) {
+			GetRiskItemsByType(c, manager)
+		})
+		v1.GET("/risk/:id/:type", func(c *gin.Context) {
+			GetRiskItem(c, manager)
+		})
+		v1.GET("/player/risk", func(c *gin.Context) {
+			GetPlayerRiskItems(c, manager)
+		})
 	}
 }
 
@@ -63,6 +78,13 @@ func StartGame(c *gin.Context, manager *postgres.Manager) {
 	game := service.StartGame(userID)
 
 	if err := manager.SaveGame(game); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	if err := manager.InitStocksAndCryptos(userID); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})

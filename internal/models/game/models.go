@@ -54,4 +54,35 @@ type Vacancy struct {
 	CareerGrade int `json:"career_grade"`
 	Salary float64 `json:"salary"`
 	HappinessEffect int `json:"happiness_effect"`
+	MonthsToGrade int `json:"months_to_grade"`
+}
+
+type Risk struct {
+	ID int64 `json:"id"`
+	Name string `json:"name"`
+	Title string `json:"title"`
+	RiskType RiskType `json:"risk_type"`
+	CryptoCategory int `json:"crypto_category"`
+	Price float64 `json:"price"`
+	WinChance int `json:"win_chance"`
+	LoseChance int `json:"lose_chance"`
+}
+
+type RiskItem struct {
+	ID int64 `json:"id"`
+	Name string `json:"name"`
+	PriceHistory []struct {
+		Price float64 `json:"price"`
+		Month int `json:"month"`
+	} `json:"price_history"`
+	CurrentPrice float64 `json:"current_price"`
+	WinChance int `json:"win_chance"`
+	LoseChance int 	`json:"lose_chance"`
+}
+
+type RiskItems struct {
+	Crypto []Risk `json:"crypto"`
+	Stocks []Risk `json:"stocks"`
+	Bets []Risk `json:"bets"`
+	QuestionableProjects []Risk `json:"questionable_projects"`
 }

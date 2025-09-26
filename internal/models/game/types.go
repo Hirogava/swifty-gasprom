@@ -29,3 +29,12 @@ const (
 	MarketingAndSales CareerType = "marketing_and_sales"
 	WorkingProfessions CareerType = "working_professions"
 )
+
+type RiskType string
+
+const (
+	Bets RiskType = "bets"
+	QuestionableProjects RiskType = "questionable_projects"
+	Crypto RiskType = "crypto"
+	Stocks RiskType = "stocks"
+)
