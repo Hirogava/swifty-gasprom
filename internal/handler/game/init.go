@@ -75,6 +75,9 @@ func InitGameHandlers(r *gin.Engine, manager *postgres.Manager) {
 		v1.GET("/player/news/:id", func(c *gin.Context) {
 			GetCurrentNews(c, manager)
 		})
+		v1.POST("/month/next", func(c *gin.Context) {
+			NextMonthMove(c, manager)
+		})
 	}
 }
 

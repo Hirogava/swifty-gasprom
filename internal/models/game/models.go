@@ -7,6 +7,7 @@ type UserProgress struct {
 	Happiness int `json:"happiness"`
 	Month int `json:"month"`
 	Status UserStatus `json:"status"`
+	Natural_expenses int `json:"natural_expenses"`
 }
 
 type News struct {
@@ -86,4 +87,36 @@ type RiskItems struct {
 	Stocks []Risk `json:"stocks"`
 	Bets []Risk `json:"bets"`
 	QuestionableProjects []Risk `json:"questionable_projects"`
+}
+
+type DBRisk struct {
+	ID int64 `json:"id"`
+	Name string `json:"name"`
+	Title string `json:"title"`
+	RiskType RiskType `json:"risk_type"`
+	CryptoCategory *int `json:"crypto_category"`
+	Price float64 `json:"price"`
+	MaxPrice float64 `json:"max_price"`
+	MinPrice float64 `json:"min_price"`
+	WinChance int `json:"win_chance"`
+	LoseChance int `json:"lose_chance"`
+	MaxWin float64 `json:"max_win"`
+	MaxLose float64 `json:"max_lose"`
+}
+
+type DBNews struct {
+	ID int64 `json:"id"`
+	Title string `json:"title"`
+	Text string `json:"text"`
+	Type NewsType `json:"type"`
+	CryptoCategory int `json:"crypto_category"`
+	EffectOnMarket int `json:"effect_on_market"`
+	Effect bool `json:"effect"`
+}
+
+type Month struct {
+	Money float64 `json:"money"`
+	Happiness int `json:"happiness"`
+	Month int `json:"month"`
+	News []News `json:"news"`
 }

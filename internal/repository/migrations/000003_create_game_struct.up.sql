@@ -39,6 +39,7 @@ CREATE TYPE "life_market_category" AS ENUM (
 CREATE TABLE "configs" (
   "id" serial PRIMARY KEY,
   "month_inflation" decimal(10,2)
+  "month_dividend" decimal(10,2)
 );
 
 CREATE TABLE "careers" (
@@ -50,6 +51,7 @@ CREATE TABLE "careers" (
   "min_salary" decimal(10,2),
   "max_salary" decimal(10,2),
   "happiness_penalty_factor" integer,
+  "natural_expenses" decimal(10,2),
   "months_to_grade" integer
 );
 
@@ -59,6 +61,7 @@ CREATE TABLE "user_career" (
   "career_grade" integer,
   "salary" decimal(10,2) NOT NULL,
   "career_id" integer NOT NULL,
+  "natural_expenses" decimal(10,2),
   "user_id" UUID NOT NULL
 );
 
@@ -111,7 +114,8 @@ CREATE TABLE "news" (
   "type" news_type NOT NULL,
   "news_title" varchar(255) NOT NULL,
   "news_text" text NOT NULL,
-  "effect_on_market" jsonb,
+  "effect_on_market" integer,
+  "effect" boolean,
   "version" int
 );
 
@@ -129,6 +133,7 @@ CREATE TABLE "user_progress" (
   "health" integer DEFAULT 100,
   "month" integer DEFAULT 1,
   "status" user_statuses NOT NULL,
+  "natural_expenses" integer,
   "last_sync_at" timestamp
 );
 

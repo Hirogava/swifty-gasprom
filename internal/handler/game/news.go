@@ -11,7 +11,7 @@ import (
 )
 
 func GetPlayerNews(c *gin.Context, manager *postgres.Manager) {
-	news, err := manager.GetPlayerNews(c.Param("userID"))
+	news, err := manager.GetPlayerNews(c.GetString("userID"))
 	switch err {
 	case nil:
 		c.JSON(http.StatusOK, gin.H{
@@ -40,7 +40,7 @@ func GetCurrentNews(c *gin.Context, manager *postgres.Manager) {
 		return
 	}
 
-	news, err := manager.GetCurrentNews(id, c.Param("userID"))
+	news, err := manager.GetCurrentNews(id, c.GetString("userID"))
 	switch err {
 	case nil:
 		c.JSON(http.StatusOK, gin.H{

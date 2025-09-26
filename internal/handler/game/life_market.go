@@ -23,9 +23,7 @@ func BuyLifeMarketItem(c *gin.Context, manager *postgres.Manager) {
 		return
 	}
 
-	userID := c.Param("userID")
-
-	err = manager.BuyLifeMarketItem(&item, userID)
+	err = manager.BuyLifeMarketItem(&item, c.GetString("userID"))
 	switch err {
 	case nil:
 		c.JSON(http.StatusOK, gin.H{

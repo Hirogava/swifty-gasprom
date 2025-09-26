@@ -33,13 +33,13 @@ func BuyRiskItem(c *gin.Context, manager *postgres.Manager) {
 
 	switch m := msg.(type) {
 	case *gameModels.BetsRequest:
-		err = manager.BuyBetsItem(m, c.Param("userID"))
+		err = manager.BuyBetsItem(m, c.GetString("userID"))
 	case *gameModels.CryptoRequest:
-		err = manager.BuyCryptoItem(m, c.Param("userID"))
+		err = manager.BuyCryptoItem(m, c.GetString("userID"))
 	case *gameModels.StocksRequest:
-		err = manager.BuyStocksItem(m, c.Param("userID"))
+		err = manager.BuyStocksItem(m, c.GetString("userID"))
 	case *gameModels.QuestionableProjectsRequest:
-		err = manager.BuyQPItem(m, c.Param("userID"))
+		err = manager.BuyQPItem(m, c.GetString("userID"))
 	}
 	switch err {
 	case nil:
@@ -65,7 +65,7 @@ func BuyRiskItem(c *gin.Context, manager *postgres.Manager) {
 }
 
 func GetRiskItems(c *gin.Context, manager *postgres.Manager) {
-	risk, err := manager.GetRiskItems(c.Param("userID"))
+	risk, err := manager.GetRiskItems(c.GetString("userID"))
 	switch err {
 	case nil:
 		c.JSON(http.StatusOK, gin.H{
@@ -85,7 +85,7 @@ func GetRiskItems(c *gin.Context, manager *postgres.Manager) {
 }
 
 func GetPlayerRiskItems(c *gin.Context, manager *postgres.Manager) {
-	items, err := manager.GetPlayerRiskItems(c.Param("userID"))
+	items, err := manager.GetPlayerRiskItems(c.GetString("userID"))
 	switch err {
 	case nil:
 		c.JSON(http.StatusOK, gin.H{
@@ -113,7 +113,7 @@ func GetRiskItem(c *gin.Context, manager *postgres.Manager) {
 		return
 	}
 
-	item, err := manager.GetRiskItem(id, c.Param("userID"), c.Param("type"))
+	item, err := manager.GetRiskItem(id, c.GetString("userID"), c.Param("type"))
 	switch err {
 	case nil:
 		c.JSON(http.StatusOK, gin.H{
@@ -133,7 +133,7 @@ func GetRiskItem(c *gin.Context, manager *postgres.Manager) {
 }
 
 func GetRiskItemsByType(c *gin.Context, manager *postgres.Manager) {
-	items, err := manager.GetRiskItemsByType(c.Param("type"), c.Param("userID"))
+	items, err := manager.GetRiskItemsByType(c.Param("type"), c.GetString("userID"))
 	switch err {
 	case nil:
 		c.JSON(http.StatusOK, gin.H{
