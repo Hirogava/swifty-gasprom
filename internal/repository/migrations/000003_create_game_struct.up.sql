@@ -112,10 +112,11 @@ CREATE TABLE "user_crypto_scenarios" (
 CREATE TABLE "news" (
   "id" serial PRIMARY KEY,
   "type" news_type NOT NULL,
+  "crypto_category" integer,
   "news_title" varchar(255) NOT NULL,
   "news_text" text NOT NULL,
   "effect_on_market" integer,
-  "effect" boolean,
+  "effect" bool,
   "version" int
 );
 

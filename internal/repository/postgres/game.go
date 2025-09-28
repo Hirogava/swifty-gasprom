@@ -979,7 +979,7 @@ func (manager *Manager) NextMonthMove(userID string) (*gameModels.Month, error) 
 		}
 	}
 
-	if err := tx.QueryRow(`UPDATE user_progress set month = month + 1, money = money - $1 + $2 + $3, happiness = happiness - $4 WHERE user_id = $5 RETURNING money, happiness, month`, monthDividend, riskSum, naturalExpenses, happiness, userID).Scan(&month.Money, &month.Happiness, &month.Month); err != nil {
+	if err := tx.QueryRow(`UPDATE user_progress set month = month + 1, money = money + $1 + $2 - $3, happiness = happiness - $4 WHERE user_id = $5 RETURNING money, happiness, month`, monthDividend, riskSum, naturalExpenses, happiness, userID).Scan(&month.Money, &month.Happiness, &month.Month); err != nil {
 		return nil, err
 	}
 
