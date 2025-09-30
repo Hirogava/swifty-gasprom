@@ -11,7 +11,7 @@ import (
 )
 
 func (manager *Manager) SaveGame(game *gameModels.UserProgress) error {
-	err := manager.Conn.QueryRow(`INSERT INTO user_progress (user_id, money, happiness, month, status) VALUES ($1, $2, $3, $4, $5)`, game.UserID, game.Money, game.Happiness, game.Month, game.Status).Scan(&game.ID)
+	err := manager.Conn.QueryRow(`INSERT INTO user_progress (user_id, money, happiness, month, status) VALUES ($1, $2, $3, $4, $5) RETURNING id`, game.UserID, game.Money, game.Happiness, game.Month, game.Status).Scan(&game.ID)
 	if err != nil {
 		return err
 	}
@@ -20,62 +20,113 @@ func (manager *Manager) SaveGame(game *gameModels.UserProgress) error {
 }
 
 func (manager *Manager) InitStocksAndCryptos(userID string) error {
-	tx, err := manager.Conn.Begin()
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback()
+    cryptoScenarios, err := manager.getCryptoScenarios()
+    if err != nil {
+        return err
+    }
 
-	rows, err := tx.Query(`SELECT id, title, min_price, start_win_chance, type, crypto_category FROM scenarios where type = $1 or type = $2`, gameModels.Stocks, gameModels.Crypto)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return dbErrors.ErrNotFound
-		} else {
-			return err
-		}
-	}
+    riskScenarios, err := manager.getRiskScenarios() 
+    if err != nil {
+        return err
+    }
 
-	for rows.Next() {
-		var crypto gameModels.Risk
-		var minPrice float64
+    if err := manager.insertCryptoScenarios(userID, cryptoScenarios); err != nil {
+        return err
+    }
 
-		if err := rows.Scan(&crypto.ID, &crypto.Title, &minPrice, &crypto.WinChance, &crypto.RiskType, &crypto.CryptoCategory); err != nil {
-			return err
-		}
+    if err := manager.insertRiskScenarios(userID, riskScenarios); err != nil {
+        return err
+    }
 
-		rng := gameService.NewRNG()
+    return nil
+}
 
-		crypto.Price = rng.GenerateMinPrice(minPrice)
+func (manager *Manager) getCryptoScenarios() ([]gameModels.Risk, error) {
+    var scenarios []gameModels.Risk
+    
+    rows, err := manager.Conn.Query(`SELECT id, title, min_price, start_win_chance, type, crypto_category FROM scenarios where type = $1 or type = $2`, 
+        gameModels.Stocks, gameModels.Crypto)
+    if err != nil {
+        return nil, err
+    }
+    defer rows.Close()
 
-		if _, err := tx.Exec(`INSERT INTO user_crypto_scenarios (id, name, price, win_chance, type, crypto_category, month) VALUES ($1, $2, $3, $4, $5, $6, 1)`, crypto.ID, crypto.Title, crypto.Price, crypto.WinChance, crypto.RiskType, crypto.CryptoCategory); err != nil {
-			return err
-		}
-	}
-	rows.Close()
+    for rows.Next() {
+        var scenario gameModels.Risk
+        var minPrice float64
 
-	rows, err = tx.Query(`SELECT id, title, min_price, start_win_chance, type FROM scenarios where type = $1`, gameModels.Bets)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return dbErrors.ErrNotFound
-		} else {
-			return err
-		}
-	}
-	defer rows.Close()
+        if err := rows.Scan(&scenario.ID, &scenario.Title, &minPrice, &scenario.WinChance, &scenario.RiskType, &scenario.CryptoCategory); err != nil {
+            return nil, err
+        }
 
-	for rows.Next() {
-		var crypto gameModels.Risk
+        rng := gameService.NewRNG()
+        scenario.Price = rng.GenerateMinPrice(minPrice)
+        scenarios = append(scenarios, scenario)
+    }
 
-		if err := rows.Scan(&crypto.ID, &crypto.Title, &crypto.Price, &crypto.WinChance, &crypto.RiskType); err != nil {
-			return err
-		}
+    return scenarios, rows.Err()
+}
 
-		if _, err := tx.Exec(`INSERT INTO user_crypto_scenarios (id, name, price, win_chance, type) VALUES ($1, $2, $3, $4, $5)`, crypto.ID, crypto.Title, crypto.Price, crypto.WinChance, crypto.RiskType); err != nil {
-			return err
-		}
-	}
+func (manager *Manager) getRiskScenarios() ([]gameModels.Risk, error) {
+    var scenarios []gameModels.Risk
+    
+    rows, err := manager.Conn.Query(`SELECT id, title, min_price, start_win_chance, type FROM scenarios where type = $1 or type = $2`, 
+        gameModels.Bets, gameModels.QuestionableProjects)
+    if err != nil {
+        return nil, err
+    }
+    defer rows.Close()
 
-	return tx.Commit()
+    for rows.Next() {
+        var scenario gameModels.Risk
+        var minPrice float64
+
+        if err := rows.Scan(&scenario.ID, &scenario.Title, &minPrice, &scenario.WinChance, &scenario.RiskType); err != nil {
+            return nil, err
+        }
+
+        rng := gameService.NewRNG()
+        scenario.Price = rng.GenerateMinPrice(minPrice)
+        scenarios = append(scenarios, scenario)
+    }
+
+    return scenarios, rows.Err()
+}
+
+func (manager *Manager) insertCryptoScenarios(userID string, scenarios []gameModels.Risk) error {
+    tx, err := manager.Conn.Begin()
+    if err != nil {
+        return err
+    }
+    defer tx.Rollback()
+
+    for _, scenario := range scenarios {
+        _, err := tx.Exec(`INSERT INTO user_crypto_scenarios (user_id, scenario_id, name, price, win_chance, type, crypto_category, month) VALUES ($1, $2, $3, $4, $5, $6, $7, 1)`, 
+            userID, scenario.ID, scenario.Title, scenario.Price, scenario.WinChance, scenario.RiskType, scenario.CryptoCategory)
+        if err != nil {
+            return err
+        }
+    }
+
+    return tx.Commit()
+}
+
+func (manager *Manager) insertRiskScenarios(userID string, scenarios []gameModels.Risk) error {
+    tx, err := manager.Conn.Begin()
+    if err != nil {
+        return err
+    }
+    defer tx.Rollback()
+
+    for _, scenario := range scenarios {
+        _, err := tx.Exec(`INSERT INTO risk (user_id, scenario_id, name, price, win_chance, type) VALUES ($1, $2, $3, $4, $5, $6)`, 
+            userID, scenario.ID, scenario.Title, scenario.Price, scenario.WinChance, scenario.RiskType)
+        if err != nil {
+            return err
+        }
+    }
+
+    return tx.Commit()
 }
 
 func (manager *Manager) GetUserGameInfo(userID string) (*gameModels.UserGameInfo, error) {
@@ -112,7 +163,7 @@ func (manager *Manager) GetUserGameInfo(userID string) (*gameModels.UserGameInfo
 		WHERE up.user_id = $1
 		ORDER BY uc.taked_at DESC
 		LIMIT 1
-		`).Scan(&gameInfo.UserProgress.ID, &gameInfo.UserProgress.UserID, &gameInfo.UserProgress.Money,
+		`, userID).Scan(&gameInfo.UserProgress.ID, &gameInfo.UserProgress.UserID, &gameInfo.UserProgress.Money,
 		&gameInfo.UserProgress.Happiness, &gameInfo.UserProgress.Month, &gameInfo.UserProgress.Status, &gameInfo.UserProgress.Natural_expenses,
 		&gameInfo.News.ID, &gameInfo.News.Title, &gameInfo.News.Text, &gameInfo.Career.ID,
 		&gameInfo.Career.Grade, &gameInfo.Career.Salary, &gameInfo.Career.Name, &gameInfo.Career.CareerType)
@@ -261,12 +312,13 @@ func (manager *Manager) GetPlayerVacancy(userID string) (*gameModels.Vacancy, er
 
 	if err := manager.Conn.QueryRow(`
 			SELECT 
+				uc.career_id,
 				uc.career_level,
 				uc.career_grade,
 				uc.salary,
 				c.name AS career_name,
-				c.career_type
-				c.happiness_penalty_factor
+				c.career_type,
+				c.happiness_penalty_factor,
 				c.months_to_grade
 			FROM user_career uc
 			JOIN careers c 
@@ -274,7 +326,7 @@ func (manager *Manager) GetPlayerVacancy(userID string) (*gameModels.Vacancy, er
 			WHERE uc.user_id = $1
 			ORDER BY uc.taked_at DESC
 			LIMIT 1
-		`, userID).Scan(&vacancy.CareerLevel, &vacancy.CareerGrade, &vacancy.Salary, &vacancy.Name, &vacancy.Type, &vacancy.HappinessEffect, &vacancy.MonthsToGrade); err != nil {
+		`, userID).Scan(&vacancy.ID, &vacancy.CareerLevel, &vacancy.CareerGrade, &vacancy.Salary, &vacancy.Name, &vacancy.Type, &vacancy.HappinessEffect, &vacancy.MonthsToGrade); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, dbErrors.ErrNotFound
 		} else {
@@ -287,12 +339,10 @@ func (manager *Manager) GetPlayerVacancy(userID string) (*gameModels.Vacancy, er
 
 func (manager *Manager) SetPlayerVacancy(userID string, req *gameModels.SetVacancyRequest) error {
 	_, err := manager.Conn.Exec(`
-		UPDATE user_career
-		SET career_id = $1,
-			salary = $2,
-			user_id = $3,
-			career_level = $4,
-			career_grade = $5
+		INSERT INTO user_career
+		(career_id,	salary, user_id, career_level, career_grade)
+		VALUES
+		($1, $2, $3, $4, $5)
 		`, req.ID, gameService.ArithmeticMeanSalary(req.MinSalary, req.MaxSalary), userID, req.Level, req.Grade)
 	if err != nil {
 		return err
@@ -538,7 +588,7 @@ func (manager *Manager) GetRiskItems(userID string) (*gameModels.RiskItems, erro
 	}
 	rows.Close()
 
-	rows, err = manager.Conn.Query(`
+	rows2, err := manager.Conn.Query(`
 		SELECT name, type, price
 		FROM user_crypto_scenarios
 		WHERE user_id = $1
@@ -554,12 +604,12 @@ func (manager *Manager) GetRiskItems(userID string) (*gameModels.RiskItems, erro
 			return nil, err
 		}
 	}
-	defer rows.Close()
+	defer rows2.Close()
 
-	for rows.Next() {
+	for rows2.Next() {
 		var item gameModels.Risk
 
-		if err := rows.Scan(&item.Name, &item.RiskType, &item.Price); err != nil {
+		if err := rows2.Scan(&item.Name, &item.RiskType, &item.Price); err != nil {
 			return nil, err
 		}
 
@@ -676,6 +726,7 @@ func (manager *Manager) GetRiskItemsByType(itemType string, userID string) ([]ga
 	if itemType == string(gameModels.Crypto) || itemType == string(gameModels.Stocks) {
 		rows, err := manager.Conn.Query(`
 			SELECT 
+			    id,
 				name,
 				price,
 				win_chance,
@@ -695,7 +746,7 @@ func (manager *Manager) GetRiskItemsByType(itemType string, userID string) ([]ga
 		for rows.Next() {
 			var item gameModels.Risk
 
-			if err := rows.Scan(&item.Name, &item.Price, &item.WinChance, &item.LoseChance); err != nil {
+			if err := rows.Scan(&item.ID, &item.Name, &item.Price, &item.WinChance, &item.LoseChance); err != nil {
 				return nil, err
 			}
 
@@ -870,7 +921,7 @@ func (manager *Manager) NextMonthMove(userID string) (*gameModels.Month, error) 
 
 	var news []gameModels.DBNews
 
-	rows, err = tx.Query(`
+	rows2, err := tx.Query(`
 		SELECT 
 			n.id,
 			n.news_title,
@@ -897,26 +948,25 @@ func (manager *Manager) NextMonthMove(userID string) (*gameModels.Month, error) 
 		}
 	}
 
-	for rows.Next() {
+	for rows2.Next() {
 		var item gameModels.DBNews
 
-		if err := rows.Scan(&item.ID, &item.Title, &item.Text, &item.EffectOnMarket, &item.Type, &item.CryptoCategory, &item.Effect); err != nil {
+		if err := rows2.Scan(&item.ID, &item.Title, &item.Text, &item.EffectOnMarket, &item.Type, &item.CryptoCategory, &item.Effect); err != nil {
 			return nil, err
 		}
 
 		news = append(news, item)
 	}
-	rows.Close()
+	rows2.Close()
 
 	var bets []gameModels.DBRisk
 
-	rows, err = tx.Query(`
+	rows3, err := tx.Query(`
 		SELECT 
 			r.id as id,
 			r.name as name,
 			s.title as title,
 			r.type as risk_type,
-			r.crypto_category as crypto_category,
 			r.price as price,
 			s.max_price as max_price,
 			s.min_price as min_price,
@@ -926,7 +976,6 @@ func (manager *Manager) NextMonthMove(userID string) (*gameModels.Month, error) 
 			s.max_lose as max_lose
 		FROM risk r
 		INNER JOIN scenarios s ON r.scenario_id = s.id
-		LEFT JOIN crypto c ON r.crypto_category = c.id
 		WHERE r.user_id = $1`, userID)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -936,16 +985,16 @@ func (manager *Manager) NextMonthMove(userID string) (*gameModels.Month, error) 
 		}
 	}
 
-	for rows.Next() {
+	for rows3.Next() {
 		var item gameModels.DBRisk
 
-		if err := rows.Scan(&item.ID, &item.Name, &item.Title, &item.RiskType, &item.CryptoCategory, &item.Price, &item.MaxPrice, &item.MinPrice, &item.WinChance, &item.LoseChance, &item.MaxWin, &item.MaxLose); err != nil {
+		if err := rows3.Scan(&item.ID, &item.Name, &item.Title, &item.RiskType, &item.Price, &item.MaxPrice, &item.MinPrice, &item.WinChance, &item.LoseChance, &item.MaxWin, &item.MaxLose); err != nil {
 			return nil, err
 		}
 
 		bets = append(bets, item)
 	}
-	rows.Close()
+	rows3.Close()
 
 	riskSum := gameService.CountMonthRisks(bets)
 
@@ -968,10 +1017,18 @@ func (manager *Manager) NextMonthMove(userID string) (*gameModels.Month, error) 
 		}
 	}
 	
-	var naturalExpenses float64
+	var naturalExpenses sql.NullFloat64
 	var happiness int
+	var salary sql.NullFloat64
 
-	if err := tx.QueryRow(`SELECT natural_expenses, happiness_penalty_factor FROM user_career WHERE user_id = $1 LIMIT 1`, userID).Scan(&naturalExpenses, &happiness); err != nil {
+	if err := tx.QueryRow(`SELECT 
+			uc.natural_expenses,
+			c.happiness_penalty_factor,
+			uc.salary
+		FROM user_career uc
+		JOIN careers c ON uc.career_id = c.id
+		WHERE uc.user_id = $1 
+		LIMIT 1`, userID).Scan(&naturalExpenses, &happiness, &salary); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, dbErrors.ErrNotFound
 		} else {
@@ -979,11 +1036,27 @@ func (manager *Manager) NextMonthMove(userID string) (*gameModels.Month, error) 
 		}
 	}
 
-	if err := tx.QueryRow(`UPDATE user_progress set month = month + 1, money = money + $1 + $2 - $3, happiness = happiness - $4 WHERE user_id = $5 RETURNING money, happiness, month`, monthDividend, riskSum, naturalExpenses, happiness, userID).Scan(&month.Money, &month.Happiness, &month.Month); err != nil {
+	naturalExpensesValue := 0.0
+	if naturalExpenses.Valid {
+		naturalExpensesValue = naturalExpenses.Float64
+	}
+
+	salaryValue := 0.0
+	if salary.Valid {
+		salaryValue = salary.Float64
+	}
+
+	var money sql.NullFloat64
+
+	if err := tx.QueryRow(`UPDATE user_progress set month = month + 1, money = money + $1 + $2 - $3 + $4, happiness = happiness - $5 WHERE user_id = $6 RETURNING money, happiness, month`, monthDividend, riskSum, naturalExpensesValue, salaryValue, happiness, userID).Scan(&money, &month.Happiness, &month.Month); err != nil {
 		return nil, err
 	}
 
-	rows, err = tx.Query(`
+	if money.Valid {
+		month.Money = money.Float64
+	}
+
+	rows4, err := tx.Query(`
 		WITH selected_news AS (
 			(SELECT id FROM news
 				WHERE type = 'economic' 
@@ -1022,7 +1095,7 @@ func (manager *Manager) NextMonthMove(userID string) (*gameModels.Month, error) 
 			n.news_title,
 			n.news_text
 		FROM news n
-		INNER JOIN inserted_news in ON n.id = in.news_id`, userID, month.Month)
+		INNER JOIN inserted_news ine ON n.id = ine.news_id`, userID, month.Month)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, dbErrors.ErrNotFound
@@ -1031,20 +1104,36 @@ func (manager *Manager) NextMonthMove(userID string) (*gameModels.Month, error) 
 		}
 	}
 
-	for rows.Next() {
+	for rows4.Next() {
 		var item gameModels.News
 
-		if err := rows.Scan(&item.ID, &item.Type, &item.Title, &item.Text); err != nil {
+		if err := rows4.Scan(&item.ID, &item.Type, &item.Title, &item.Text); err != nil {
 			return nil, err
 		}
 
 		month.News = append(month.News, item)
 	}
-	rows.Close()
+	rows4.Close()
+
+	err = manager.SaveCurrentNews(month.News, month.Month, userID)
+	if err != nil {
+		return nil, err
+	}
 
 	if err := tx.Commit(); err != nil {
 		return nil, err
 	}
 
 	return &month, nil
+}
+
+func (manager *Manager) SaveCurrentNews(news []gameModels.News, month int, userID string) error {
+	for _, item := range news {
+		_, err := manager.Conn.Exec(`INSERT INTO current_progress_news (news_id, user_id, month) VALUES ($1, $2, $3)`, item.ID, userID, month)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

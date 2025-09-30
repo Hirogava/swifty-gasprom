@@ -8,8 +8,8 @@ import (
 )
 
 func InitBankHandlers(r *gin.Engine, manager *postgres.Manager) {
-	r.Use(middleware.AuthMiddleware())
 	v1 := r.Group("/api/v1")
+	v1.Use(middleware.AuthMiddleware())
 	{
 		v1.POST("/card/:id", func(c *gin.Context) {
 			SaveUserBankProduct(c, manager)

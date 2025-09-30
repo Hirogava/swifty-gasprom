@@ -13,10 +13,10 @@ import (
 )
 
 func InitGameHandlers(r *gin.Engine, manager *postgres.Manager) {
-	r.Use(middleware.AuthMiddleware())
 	v1 := r.Group("/api/v1")
+	v1.Use(middleware.AuthMiddleware())
 	{
-		v1.GET("/start", func(c *gin.Context) {
+		v1.POST("/start", func(c *gin.Context) {
 			StartGame(c, manager)
 		})
 		v1.GET("/progress", func(c *gin.Context) {

@@ -10,7 +10,7 @@ import (
 func (manager *Manager) SaveUserBankProduct(userId string, cardId int) (bankModels.BankProduct, error) {
 	var bankProduct bankModels.BankProduct
 
-	if err := manager.Conn.QueryRow(`INSERT INTO user_used_bank_products (user_id, bank_product__id) VALUES ($1, $2) RETURNING id`, userId, cardId).Scan(&bankProduct.ID); err != nil {
+	if _, err := manager.Conn.Exec(`INSERT INTO user_used_bank_products (user_id, bank_product_id) VALUES ($1, $2)`, userId, cardId); err != nil {
 		return bankModels.BankProduct{}, err
 	}
 
@@ -36,7 +36,7 @@ func (manager *Manager) GetUserBankProduct(userId string) (bankModels.BankProduc
 			JOIN bank_products bp 
 				ON uubp.bank_product_id = bp.id
 			WHERE uubp.user_id = $1`,
-		bankProduct.ID).Scan(&bankProduct.Name, &bankProduct.Url, &bankProduct.Type); err != nil {
+		userId).Scan(&bankProduct.Name, &bankProduct.Url, &bankProduct.Type); err != nil {
 		if err == sql.ErrNoRows {
 			return bankModels.BankProduct{}, dbErrors.ErrNotFound
 		} else {
@@ -50,7 +50,7 @@ func (manager *Manager) GetUserBankProduct(userId string) (bankModels.BankProduc
 func (manager *Manager) SaveUserBankBonus(userId string, bonusId int) (bankModels.BankBonus, error) {
 	var bankBonus bankModels.BankBonus
 
-	if err := manager.Conn.QueryRow(`INSERT INTO user_bonuses (user_id, bonus_id, status) VALUES ($1, $2, $3)`, userId, bonusId, bankModels.Pending).Err(); err != nil {
+	if _, err := manager.Conn.Exec(`INSERT INTO user_bonuses (user_id, bonus_id, status) VALUES ($1, $2, $3)`, userId, bonusId, bankModels.Pending); err != nil {
 		return bankModels.BankBonus{}, err
 	}
 
@@ -99,7 +99,7 @@ func (manager *Manager) GetUserBankBonuses(userId string) ([]bankModels.BankBonu
 }
 
 func (manager *Manager) UpdateUserBonusStatusType(req bankModels.UpdateBonusStatusRequest) error {
-	if _, err := manager.Conn.Exec(`UPDATE user_bonuses SET status = $1 WHERE bonus_id = $2 and user_id`, req.Status, req.ID, req.UserID); err != nil {
+	if _, err := manager.Conn.Exec(`UPDATE user_bonuses SET status = $1 WHERE bonus_id = $2 and user_id = $3`, req.Status, req.ID, req.UserID); err != nil {
 		return err
 	}
 

@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Swifty Gasprom API Tester</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: auto; }
+        details { margin-bottom: 20px; border: 1px solid #ccc; padding: 10px; }
+        form { display: flex; flex-direction: column; }
+        label { margin-top: 10px; }
+        input, textarea { padding: 5px; }
+        button { margin-top: 10px; background: #007bff; color: white; border: none; padding: 10px; cursor: pointer; }
+        pre { background: #f8f9fa; padding: 10px; border: 1px solid #ddd; white-space: pre-wrap; font-family: monospace; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>Swifty Gasprom API Tester</h1>
+    <p>Base URL: <input id="baseUrl" value="http://localhost:8080/api/v1" style="width: 300px;"></p>
+    <p>Current Token: <span id="tokenDisplay">None</span> <button onclick="clearToken()">Clear Token</button></p>
+
+    <details>
+        <summary>Auth Endpoints</summary>
+        
+        <h3>POST /login</h3>
+        <form id="loginForm">
+            <label>Bank User ID: <input name="bank_user_id" required></label>
+            <button type="submit">Send</button>
+        </form>
+        <pre id="loginResponse"></pre>
+        
+        <h3>POST /refresh</h3>
+        <form id="refreshForm">
+            <button type="submit">Send</button>
+        </form>
+        <pre id="refreshResponse"></pre>
+        
+        <h3>POST /logout</h3>
+        <form id="logoutForm">
+            <button type="submit">Send</button>
+        </form>
+        <pre id="logoutResponse"></pre>
+    </details>
+
+    <details>
+        <summary>Game Endpoints (Bearer Required)</summary>
+        
+        <h3>POST /start</h3>
+        <form id="gameStartForm">
+            <button type="submit">Send</button>
+        </form>
+        <pre id="gameStartResponse"></pre>
+        
+        <h3>GET /progress</h3>
+        <form id="gameProgressForm">
+            <button type="submit">Send</button>
+        </form>
+        <pre id="gameProgressResponse"></pre>
+        
+        <h3>GET /vacancies</h3>
+        <form id="gameVacanciesForm">
+            <button type="submit">Send</button>
+        </form>
+        <pre id="gameVacanciesResponse"></pre>
+        
+        <h3>GET /vacancy</h3>
+        <form id="gameVacancyGetForm">
+            <label>Name: <input name="name" required></label>
+            <button type="submit">Send</button>
+        </form>
+        <pre id="gameVacancyGetResponse"></pre>
+        
+        <h3>POST /player/vacancy</h3>
+        <form id="gameVacancySetForm">
+            <label>ID: <input name="id" required></label>
+            <label>Level: <input name="level" required></label>
+            <label>Grade: <input name="grade" required></label>
+            <label>Min Salary: <input name="min_salary" type="number" step="0.01" required></label>
+            <label>Max Salary: <input name="max_salary" type="number" step="0.01" required></label>
+            <button type="submit">Send</button>
+        </form>
+        <pre id="gameVacancySetResponse"></pre>
+        
+        <h3>PUT /player/vacancy/:name</h3>
+        <form id="gameVacancyUpdateForm">
+            <label>Name: <input name="name" required></label>
+            <label>ID: <input name="id" required></label>
+            <label>Level: <input name="level" required></label>
+            <label>Grade: <input name="grade" required></label>
+            <label>Type: 
+                <select name="type">
+                    <option value="it_and_technology">IT and Technology</option>
+                    <option value="engineering_and_manufacturing">Engineering and Manufacturing</option>
+                    <option value="medicine_and_healthcare">Medicine and Healthcare</option>
+                    <option value="marketing_and_sales">Marketing and Sales</option>
+                    <option value="working_professions">Working Professions</option>
+                </select>
+            </label>
+            <button type="submit">Send</button>
+        </form>
+        <pre id="gameVacancyUpdateResponse"></pre>
+        
+        <h3>DELETE /player/vacancy/:id</h3>
+        <form id="gameVacancyDeleteForm">
+            <label>ID: <input name="id" required></label>
+            <button type="submit">Send</button>
+        </form>
+        <pre id="gameVacancyDeleteResponse"></pre>
+        
+        <h3>PUT /player/vacancy/grade/:id</h3>
+        <form id="gameVacancyGradeForm">
+            <label>ID: <input name="id" required></label>
+            <button type="submit">Send</button>
+        </form>
+        <pre id="gameVacancyGradeResponse"></pre>
+        
+        <h3>GET /player/vacancy</h3>
+        <form id="gamePlayerVacancyForm">
+            <button type="submit">Send</button>
+        </form>
+        <pre id="gamePlayerVacancyResponse"></pre>
+        
+        <h3>GET /life-market</h3>
+        <form id="gameLifeMarketForm">
+            <button type="submit">Send</button>
+        </form>
+        <pre id="gameLifeMarketResponse"></pre>
+        
+        <h3>GET /life-market/:id</h3>
+        <form id="gameLifeMarketGetForm">
+            <label>ID: <input name="id" required></label>
+            <button type="submit">Send</button>
+        </form>
+        <pre id="gameLifeMarketGetResponse"></pre>
+        
+        <h3>POST /life-market/:id</h3>
+        <form id="gameLifeMarketBuyForm">
+            <label>ID: <input name="id" required></label>
+            <label>Cost: <input name="cost" type="number" step="0.01" required></label>
+            <label>Happiness: <input name="happiness" type="number" required></label>
+            <button type="submit">Send</button>
+        </form>
+        <pre id="gameLifeMarketBuyResponse"></pre>
+        
+        <h3>GET /event</h3>
+        <form id="gameEventsForm">
+            <button type="submit">Send</button>
+        </form>
+        <pre id="gameEventsResponse"></pre>
+        
+        <h3>GET /risk</h3>
+        <form id="gameRisksForm">
+            <button type="submit">Send</button>
+        </form>
+        <pre id="gameRisksResponse"></pre>
+        
+        <h3>GET /risk/type/:type</h3>
+        <form id="gameRiskTypeForm">
+            <label>Type: 
+                <select name="type">
+                    <option value="crypto">Crypto</option>
+                    <option value="stocks">Stocks</option>
+                    <option value="bets">Bets</option>
+                    <option value="questionable_projects">Questionable Projects</option>
+                </select>
+            </label>
+            <button type="submit">Send</button>
+        </form>
+        <pre id="gameRiskTypeResponse"></pre>
+        
+        <h3>GET /risk/:id/:type</h3>
+        <form id="gameRiskItemForm">
+            <label>ID: <input name="id" required></label>
+            <label>Type: 
+                <select name="type">
+                    <option value="crypto">Crypto</option>
+                    <option value="stocks">Stocks</option>
+                    <option value="bets">Bets</option>
+                    <option value="questionable_projects">Questionable Projects</option>
+                </select>
+            </label>
+            <button type="submit">Send</button>
+        </form>
+        <pre id="gameRiskItemResponse"></pre>
+        
+        <h3>POST /risk</h3>
+        <form id="gameRiskInvestForm">
+            <label>Type: 
+                <select name="type" required>
+                    <option value="crypto">Crypto</option>
+                    <option value="stocks">Stocks</option>
+                    <option value="bets">Bets</option>
+                    <option value="questionable_projects">Questionable Projects</option>
+                </select>
+            </label>
+            <label>Price: <input name="price" type="number" step="0.01" required></label>
+            <label>ID: <input name="id" required placeholder="crypto_id/stock_id/bet_id/qp_id"></label>
+            <button type="submit">Send</button>
+        </form>
+        <pre id="gameRiskInvestResponse"></pre>
+        
+        <h3>GET /player/risk</h3>
+        <form id="gamePlayerRiskForm">
+            <button type="submit">Send</button>
+        </form>
+        <pre id="gamePlayerRiskResponse"></pre>
+        
+        <h3>GET /player/news</h3>
+        <form id="gamePlayerNewsForm">
+            <button type="submit">Send</button>
+        </form>
+        <pre id="gamePlayerNewsResponse"></pre>
+        
+        <h3>GET /player/news/:id</h3>
+        <form id="gamePlayerNewsGetForm">
+            <label>ID: <input name="id" required></label>
+            <button type="submit">Send</button>
+        </form>
+        <pre id="gamePlayerNewsGetResponse"></pre>
+        
+        <h3>POST /month/next</h3>
+        <form id="monthNextForm">
+            <button type="submit">Send</button>
+        </form>
+        <pre id="monthNextResponse"></pre>
+    </details>
+
+    <details>
+        <summary>Bank Endpoints (Bearer Required)</summary>
+        
+        <h3>POST /card/:id</h3>
+        <form id="bankCardGetForm">
+            <label>ID: <input name="id" required></label>
+            <button type="submit">Send</button>
+        </form>
+        <pre id="bankCardGetResponse"></pre>
+        
+        <h3>GET /card</h3>
+        <form id="bankCardCurrentForm">
+            <button type="submit">Send</button>
+        </form>
+        <pre id="bankCardCurrentResponse"></pre>
+        
+        <h3>POST /bonus/:id</h3>
+        <form id="bankBonusGetForm">
+            <label>ID: <input name="id" required></label>
+            <button type="submit">Send</button>
+        </form>
+        <pre id="bankBonusGetResponse"></pre>
+        
+        <h3>GET /bonus</h3>
+        <form id="bankBonusesListForm">
+            <button type="submit">Send</button>
+        </form>
+        <pre id="bankBonusesListResponse"></pre>
+        
+        <h3>PUT /bonus/:id</h3>
+        <form id="bankBonusUpdateForm">
+            <label>ID: <input name="id" required></label>
+            <label>User ID: <input name="user_id" required></label>
+            <label>Status: 
+                <select name="status" required>
+                    <option value="claimed">Claimed</option>
+                    <option value="pending">Pending</option>
+                    <option value="expired">Expired</option>
+                </select>
+            </label>
+            <button type="submit">Send</button>
+        </form>
+        <pre id="bankBonusUpdateResponse"></pre>
+    </details>
+
+    <script>
+        const baseUrl = document.getElementById('baseUrl').value;
+        const tokenDisplay = document.getElementById('tokenDisplay');
+
+        function updateTokenDisplay() {
+            const token = localStorage.getItem('access_token');
+            tokenDisplay.textContent = token ? token.substring(0, 20) + '...' : 'None';
+            
+            const refreshToken = localStorage.getItem('refresh_token');
+            console.log('Refresh token:', refreshToken ? refreshToken.substring(0, 20) + '...' : 'None');
+        }
+
+        function clearToken() {
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+            updateTokenDisplay();
+        }
+
+        async function sendRequest(method, path, body = null, params = {}) {
+            const url = new URL(`${document.getElementById('baseUrl').value}${path}`);
+            Object.keys(params).forEach(key => url.pathname = url.pathname.replace(`:${key}`, params[key]));
+
+            const headers = { 'Content-Type': 'application/json' };
+            const token = localStorage.getItem('access_token');
+            if (token) headers['Authorization'] = `Bearer ${token}`;
+
+            console.log('Sending request:', { method, url: url.toString(), headers, body });
+
+            try {
+                const response = await fetch(url, { method, headers, body: body ? JSON.stringify(body) : null });
+                const data = await response.json();
+                console.log('Response:', { status: response.status, data });
+                
+                if (!response.ok) throw new Error(`Status: ${response.status} - ${JSON.stringify(data)}`);
+                return data;
+            } catch (error) {
+                console.error('Request error:', error);
+                return { error: error.message };
+            }
+        }
+
+        // Auth endpoints
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const body = { bank_user_id: formData.get('bank_user_id') };
+            
+            try {
+                const res = await sendRequest('POST', '/login', body);
+                console.log('Login response:', res);
+                
+                if (res.user && res.user.token && res.user.token.access_token) {
+                    localStorage.setItem('access_token', res.user.token.access_token);
+                    localStorage.setItem('refresh_token', res.user.token.refresh_token);
+                    updateTokenDisplay();
+                }
+                
+                document.getElementById('loginResponse').textContent = JSON.stringify(res, null, 2);
+            } catch (error) {
+                document.getElementById('loginResponse').textContent = JSON.stringify({ error: error.message }, null, 2);
+            }
+        });
+
+        document.getElementById('refreshForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const refreshToken = localStorage.getItem('refresh_token');
+            if (!refreshToken) {
+                document.getElementById('refreshResponse').textContent = JSON.stringify({ error: 'No refresh token found' }, null, 2);
+                return;
+            }
+            
+            const body = { refresh_token: refreshToken };
+            const res = await sendRequest('POST', '/refresh', body);
+            
+            if (res.access_token) {
+                localStorage.setItem('access_token', res.access_token);
+                updateTokenDisplay();
+            }
+            if (res.refresh_token) {
+                localStorage.setItem('refresh_token', res.refresh_token);
+            }
+            
+            document.getElementById('refreshResponse').textContent = JSON.stringify(res, null, 2);
+        });
+
+        document.getElementById('logoutForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const res = await sendRequest('POST', '/logout');
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+            updateTokenDisplay();
+            document.getElementById('logoutResponse').textContent = JSON.stringify(res, null, 2);
+        });
+
+        // Game endpoints
+        document.getElementById('gameStartForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const res = await sendRequest('POST', '/start');
+            document.getElementById('gameStartResponse').textContent = JSON.stringify(res, null, 2);
+        });
+
+        document.getElementById('gameProgressForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const res = await sendRequest('GET', '/progress');
+            document.getElementById('gameProgressResponse').textContent = JSON.stringify(res, null, 2);
+        });
+
+        document.getElementById('gameVacanciesForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const res = await sendRequest('GET', '/vacancies');
+            document.getElementById('gameVacanciesResponse').textContent = JSON.stringify(res, null, 2);
+        });
+
+        document.getElementById('gameVacancyGetForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const body = { name: formData.get('name') };
+            const res = await sendRequest('GET', '/vacancy', body);
+            document.getElementById('gameVacancyGetResponse').textContent = JSON.stringify(res, null, 2);
+        });
+
+        document.getElementById('gameVacancySetForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const body = {
+                id: parseInt(formData.get('id')),
+                level: parseInt(formData.get('level')),
+                grade: parseInt(formData.get('grade')),
+                min_salary: parseFloat(formData.get('min_salary')),
+                max_salary: parseFloat(formData.get('max_salary'))
+            };
+            const res = await sendRequest('POST', '/player/vacancy', body);
+            document.getElementById('gameVacancySetResponse').textContent = JSON.stringify(res, null, 2);
+        });
+
+        document.getElementById('gameVacancyUpdateForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const body = {
+                id: parseInt(formData.get('id')),
+                level: parseInt(formData.get('level')),
+                grade: parseInt(formData.get('grade')),
+                type: formData.get('type')
+            };
+            const res = await sendRequest('PUT', '/player/vacancy/:name', body, { name: formData.get('name') });
+            document.getElementById('gameVacancyUpdateResponse').textContent = JSON.stringify(res, null, 2);
+        });
+
+        document.getElementById('gameVacancyDeleteForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const res = await sendRequest('DELETE', '/player/vacancy/:id', null, { id: formData.get('id') });
+            document.getElementById('gameVacancyDeleteResponse').textContent = JSON.stringify(res, null, 2);
+        });
+
+        document.getElementById('gameVacancyGradeForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const res = await sendRequest('PUT', '/player/vacancy/grade/:id', null, { id: formData.get('id') });
+            document.getElementById('gameVacancyGradeResponse').textContent = JSON.stringify(res, null, 2);
+        });
+
+        document.getElementById('gamePlayerVacancyForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const res = await sendRequest('GET', '/player/vacancy');
+            document.getElementById('gamePlayerVacancyResponse').textContent = JSON.stringify(res, null, 2);
+        });
+
+        document.getElementById('gameLifeMarketForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const res = await sendRequest('GET', '/life-market');
+            document.getElementById('gameLifeMarketResponse').textContent = JSON.stringify(res, null, 2);
+        });
+
+        document.getElementById('gameLifeMarketGetForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const res = await sendRequest('GET', '/life-market/:id', null, { id: formData.get('id') });
+            document.getElementById('gameLifeMarketGetResponse').textContent = JSON.stringify(res, null, 2);
+        });
+
+        document.getElementById('gameLifeMarketBuyForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const body = {
+                id: parseInt(formData.get('id')),
+                cost: parseFloat(formData.get('cost')),
+                happiness: parseInt(formData.get('happiness'))
+            };
+            const res = await sendRequest('POST', '/life-market/:id', body, { id: formData.get('id') });
+            document.getElementById('gameLifeMarketBuyResponse').textContent = JSON.stringify(res, null, 2);
+        });
+
+        document.getElementById('gameEventsForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const res = await sendRequest('GET', '/event');
+            document.getElementById('gameEventsResponse').textContent = JSON.stringify(res, null, 2);
+        });
+
+        document.getElementById('gameRisksForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const res = await sendRequest('GET', '/risk');
+            document.getElementById('gameRisksResponse').textContent = JSON.stringify(res, null, 2);
+        });
+
+        document.getElementById('gameRiskTypeForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const res = await sendRequest('GET', '/risk/type/:type', null, { type: formData.get('type') });
+            document.getElementById('gameRiskTypeResponse').textContent = JSON.stringify(res, null, 2);
+        });
+
+        document.getElementById('gameRiskItemForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const res = await sendRequest('GET', '/risk/:id/:type', null, { 
+                id: formData.get('id'), 
+                type: formData.get('type') 
+            });
+            document.getElementById('gameRiskItemResponse').textContent = JSON.stringify(res, null, 2);
+        });
+
+        document.getElementById('gameRiskInvestForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const type = formData.get('type');
+            const body = {
+                type: type,
+                data: btoa(JSON.stringify({
+                    price: parseFloat(formData.get('price')),
+                    [type + '_id']: parseInt(formData.get('id'))
+                }))
+            };
+            const res = await sendRequest('POST', '/risk', body);
+            document.getElementById('gameRiskInvestResponse').textContent = JSON.stringify(res, null, 2);
+        });
+
+        document.getElementById('gamePlayerRiskForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const res = await sendRequest('GET', '/player/risk');
+            document.getElementById('gamePlayerRiskResponse').textContent = JSON.stringify(res, null, 2);
+        });
+
+        document.getElementById('gamePlayerNewsForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const res = await sendRequest('GET', '/player/news');
+            document.getElementById('gamePlayerNewsResponse').textContent = JSON.stringify(res, null, 2);
+        });
+
+        document.getElementById('gamePlayerNewsGetForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const res = await sendRequest('GET', '/player/news/:id', null, { id: formData.get('id') });
+            document.getElementById('gamePlayerNewsGetResponse').textContent = JSON.stringify(res, null, 2);
+        });
+
+        document.getElementById('monthNextForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const res = await sendRequest('POST', '/month/next');
+            document.getElementById('monthNextResponse').textContent = JSON.stringify(res, null, 2);
+        });
+
+        // Bank endpoints
+        document.getElementById('bankCardGetForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const res = await sendRequest('POST', '/card/:id', null, { id: formData.get('id') });
+            document.getElementById('bankCardGetResponse').textContent = JSON.stringify(res, null, 2);
+        });
+
+        document.getElementById('bankCardCurrentForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const res = await sendRequest('GET', '/card');
+            document.getElementById('bankCardCurrentResponse').textContent = JSON.stringify(res, null, 2);
+        });
+
+        document.getElementById('bankBonusGetForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const res = await sendRequest('POST', '/bonus/:id', null, { id: formData.get('id') });
+            document.getElementById('bankBonusGetResponse').textContent = JSON.stringify(res, null, 2);
+        });
+
+        document.getElementById('bankBonusesListForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const res = await sendRequest('GET', '/bonus');
+            document.getElementById('bankBonusesListResponse').textContent = JSON.stringify(res, null, 2);
+        });
+
+        document.getElementById('bankBonusUpdateForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const body = { 
+                id: parseInt(formData.get('id')), 
+                user_id: formData.get('user_id'), 
+                status: formData.get('status') 
+            };
+            const res = await sendRequest('PUT', '/bonus/:id', body, { id: formData.get('id') });
+            document.getElementById('bankBonusUpdateResponse').textContent = JSON.stringify(res, null, 2);
+        });
+
+        updateTokenDisplay();
+    </script>
+</body>
+</html>

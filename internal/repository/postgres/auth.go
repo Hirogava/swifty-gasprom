@@ -25,13 +25,13 @@ func (manager *Manager) GetRefreshToken(userId string) (authModels.RefreshToken,
 }
 
 func (manager *Manager) DeleteRefreshToken(userId string, token string) error {
-	_, err := manager.Conn.Exec(`DELETE FROM session WHERE user_id = $1`, userId)
+	_, err := manager.Conn.Exec(`DELETE FROM session WHERE user_id = $1 and token = $2`, userId, token)
 
 	return err
 }
 
 func (manager *Manager) UpdateRefreshToken(userId string, token string) error {
-	if _, err := manager.Conn.Exec(`UPDATE session SET expires_at = $1, token = $2 WHERE user_id = $3`, time.Now().Add(time.Hour*24*7).Unix(), token, userId); err != nil {
+	if _, err := manager.Conn.Exec(`UPDATE session SET expires_at = $1, token = $2 WHERE user_id = $3`, time.Now().Add(time.Hour*24*7), token, userId); err != nil {
 		return err
 	}
 
@@ -40,10 +40,11 @@ func (manager *Manager) UpdateRefreshToken(userId string, token string) error {
 
 func (manager *Manager) FindOrCreateUser(bankUser authModels.BankUser) (authModels.User, error) {
 	var user authModels.User
+	user.BankUserID = bankUser.BankUserID
 
-	if err := manager.Conn.QueryRow(`SELECT id from user WHERE bank_user_id = $1`, bankUser.BankUserID).Scan(&user.ID); err != nil {
+	if err := manager.Conn.QueryRow(`SELECT id from users WHERE bank_user_id = $1`, bankUser.BankUserID).Scan(&user.ID); err != nil {
 		if err == sql.ErrNoRows {
-			err := manager.Conn.QueryRow(`INSERT INTO user (bank_user_id) VALUES ($1)`, bankUser.BankUserID).Scan(&user.ID)
+			err := manager.Conn.QueryRow(`INSERT INTO users (bank_user_id) VALUES ($1) RETURNING id`, bankUser.BankUserID).Scan(&user.ID)
 			if err != nil {
 				return authModels.User{}, err
 			}
