@@ -445,122 +445,158 @@ func (manager *Manager) UpdatePlayerVacancyGrade(userID string, oldCareerId int)
 }
 
 func (manager *Manager) BuyBetsItem(req *gameModels.BetsRequest, userID string) error {
-	tx, err := manager.Conn.Begin()
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback()
+    tx, err := manager.Conn.Begin()
+    if err != nil {
+        return err
+    }
+    defer tx.Rollback()
 
-	_, err = tx.Exec(`
-		UPDATE user_progress
-		SET money = money - $1
-	`, req.Price)
-	if err != nil {
-		return err
-	}
+    result, err := tx.Exec(`
+        UPDATE user_progress
+        SET money = money - $1
+        WHERE user_id = $2 AND money >= $3
+    `, req.Price, userID, req.Price)
+    if err != nil {
+        return err
+    }
 
-	_, err = tx.Exec(`
-		INSERT INTO user_buyed_risks (
-			user_id,
-			risk_id
-		)
-	`)
-	if err != nil {
-		return err
-	}
+    rowsAffected, err := result.RowsAffected()
+    if err != nil {
+        return err
+    }
+    if rowsAffected == 0 {
+        return gameErrors.ErrNotEnoughMoney
+    }
 
-	return tx.Commit()
+    _, err = tx.Exec(`
+        INSERT INTO user_buyed_risks (
+            user_id,
+            risk_id
+        ) VALUES ($1, $2)
+    `, userID, req.BetID)
+    if err != nil {
+        return err
+    }
+
+    return tx.Commit()
 }
 
 func (manager *Manager) BuyCryptoItem(req *gameModels.CryptoRequest, userID string) error {
-	tx, err := manager.Conn.Begin()
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback()
+    tx, err := manager.Conn.Begin()
+    if err != nil {
+        return err
+    }
+    defer tx.Rollback()
 
-	_, err = tx.Exec(`
-		UPDATE user_progress
-		SET money = money - $1
-	`, req.Price)
-	if err != nil {
-		return err
-	}
+    result, err := tx.Exec(`
+        UPDATE user_progress
+        SET money = money - $1
+        WHERE user_id = $2 AND money >= $3
+    `, req.Price, userID, req.Price)
+    if err != nil {
+        return err
+    }
 
-	_, err = tx.Exec(`
-		INSERT INTO user_buyed_risks (
-			user_id,
-			crypto_id
-		)
-	`)
-	if err != nil {
-		return err
-	}
+    rowsAffected, err := result.RowsAffected()
+    if err != nil {
+        return err
+    }
+    if rowsAffected == 0 {
+        return gameErrors.ErrNotEnoughMoney
+    }
 
-	return tx.Commit()
+    _, err = tx.Exec(`
+        INSERT INTO user_buyed_risks (
+            user_id,
+            crypto_id
+        ) VALUES ($1, $2)
+    `, userID, req.CryptoID)
+    if err != nil {
+        return err
+    }
+
+    return tx.Commit()
 }
 
 func (manager *Manager) BuyStocksItem(req *gameModels.StocksRequest, userID string) error {
-	tx, err := manager.Conn.Begin()
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback()
+    tx, err := manager.Conn.Begin()
+    if err != nil {
+        return err
+    }
+    defer tx.Rollback()
 
-	_, err = tx.Exec(`
-		UPDATE user_progress
-		SET money = money - $1
-	`, req.Price)
-	if err != nil {
-		return err
-	}
+    result, err := tx.Exec(`
+        UPDATE user_progress
+        SET money = money - $1
+        WHERE user_id = $2 AND money >= $3
+    `, req.Price, userID, req.Price)
+    if err != nil {
+        return err
+    }
 
-	_, err = tx.Exec(`
-		INSERT INTO user_buyed_risks (
-			user_id,
-			crypto_id
-		)
-	`)
-	if err != nil {
-		return err
-	}
+    rowsAffected, err := result.RowsAffected()
+    if err != nil {
+        return err
+    }
+    if rowsAffected == 0 {
+        return gameErrors.ErrNotEnoughMoney
+    }
 
-	return tx.Commit()
+    _, err = tx.Exec(`
+        INSERT INTO user_buyed_risks (
+            user_id,
+            crypto_id
+        ) VALUES ($1, $2)
+    `, userID, req.StockID)
+    if err != nil {
+        return err
+    }
+
+    return tx.Commit()
 }
 
 func (manager *Manager) BuyQPItem(req *gameModels.QuestionableProjectsRequest, userID string) error {
-	tx, err := manager.Conn.Begin()
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback()
+    tx, err := manager.Conn.Begin()
+    if err != nil {
+        return err
+    }
+    defer tx.Rollback()
 
-	_, err = tx.Exec(`
-		UPDATE user_progress
-		SET money = money - $1
-	`, req.Price)
-	if err != nil {
-		return err
-	}
+    result, err := tx.Exec(`
+        UPDATE user_progress
+        SET money = money - $1
+        WHERE user_id = $2 AND money >= $3
+    `, req.Price, userID, req.Price)
+    if err != nil {
+        return err
+    }
 
-	_, err = tx.Exec(`
-		INSERT INTO user_buyed_risks (
-			user_id,
-			risk_id
-		)
-	`)
-	if err != nil {
-		return err
-	}
+    rowsAffected, err := result.RowsAffected()
+    if err != nil {
+        return err
+    }
+    if rowsAffected == 0 {
+        return gameErrors.ErrNotEnoughMoney
+    }
 
-	return tx.Commit()
+    _, err = tx.Exec(`
+        INSERT INTO user_buyed_risks (
+            user_id,
+            risk_id
+        ) VALUES ($1, $2)
+    `, userID, req.QPID)
+    if err != nil {
+        return err
+    }
+
+    return tx.Commit()
 }
 
 func (manager *Manager) GetRiskItems(userID string) (*gameModels.RiskItems, error) {
 	var items gameModels.RiskItems
 
 	rows, err := manager.Conn.Query(`
-		SELECT name, type, price
+		SELECT id, name, type, price
 		FROM risk
 		WHERE user_id = $1
 		`, userID)
@@ -575,7 +611,7 @@ func (manager *Manager) GetRiskItems(userID string) (*gameModels.RiskItems, erro
 	for rows.Next() {
 		var item gameModels.Risk
 
-		if err := rows.Scan(&item.Name, &item.RiskType, &item.Price); err != nil {
+		if err := rows.Scan(&item.ID, &item.Name, &item.RiskType, &item.Price); err != nil {
 			return nil, err
 		}
 
@@ -589,7 +625,7 @@ func (manager *Manager) GetRiskItems(userID string) (*gameModels.RiskItems, erro
 	rows.Close()
 
 	rows2, err := manager.Conn.Query(`
-		SELECT name, type, price
+		SELECT id, name, type, price
 		FROM user_crypto_scenarios
 		WHERE user_id = $1
 		AND month = (
@@ -609,7 +645,7 @@ func (manager *Manager) GetRiskItems(userID string) (*gameModels.RiskItems, erro
 	for rows2.Next() {
 		var item gameModels.Risk
 
-		if err := rows2.Scan(&item.Name, &item.RiskType, &item.Price); err != nil {
+		if err := rows2.Scan(item.ID, &item.Name, &item.RiskType, &item.Price); err != nil {
 			return nil, err
 		}
 
@@ -758,6 +794,7 @@ func (manager *Manager) GetRiskItemsByType(itemType string, userID string) ([]ga
 	
 	rows, err := manager.Conn.Query(`
 		SELECT 
+			id,
 			name,
 			price,
 			win_chance,
@@ -777,7 +814,7 @@ func (manager *Manager) GetRiskItemsByType(itemType string, userID string) ([]ga
 	for rows.Next() {
 		var item gameModels.Risk
 
-		if err := rows.Scan(&item.Name, &item.Price, &item.WinChance, &item.LoseChance); err != nil {
+		if err := rows.Scan(&item.ID, &item.Name, &item.Price, &item.WinChance, &item.LoseChance); err != nil {
 			return nil, err
 		}
 
@@ -950,9 +987,16 @@ func (manager *Manager) NextMonthMove(userID string) (*gameModels.Month, error) 
 
 	for rows2.Next() {
 		var item gameModels.DBNews
+		var cryptoCategory sql.NullInt64
 
-		if err := rows2.Scan(&item.ID, &item.Title, &item.Text, &item.EffectOnMarket, &item.Type, &item.CryptoCategory, &item.Effect); err != nil {
+		if err := rows2.Scan(&item.ID, &item.Title, &item.Text, &item.EffectOnMarket, &item.Type, &cryptoCategory, &item.Effect); err != nil {
 			return nil, err
+		}
+
+		if cryptoCategory.Valid {
+			item.CryptoCategory = int(cryptoCategory.Int64)
+		} else {
+			item.CryptoCategory = 0
 		}
 
 		news = append(news, item)

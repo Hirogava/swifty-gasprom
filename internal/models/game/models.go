@@ -81,7 +81,7 @@ type RiskItem struct {
 	} `json:"price_history"`
 	CurrentPrice float64 `json:"current_price"`
 	WinChance    int     `json:"win_chance"`
-	LoseChance   int     `json:"lose_chance"`
+	LoseChance   sql.NullInt64     `json:"lose_chance"`
 }
 
 type RiskItems struct {
