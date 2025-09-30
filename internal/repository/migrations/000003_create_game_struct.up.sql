@@ -40,7 +40,7 @@ CREATE TYPE "life_market_category" AS ENUM (
 
 CREATE TABLE "configs" (
   "id" serial PRIMARY KEY,
-  "month_inflation" decimal(10,2)
+  "month_inflation" decimal(10,2),
   "month_dividend" decimal(10,2)
 );
 
