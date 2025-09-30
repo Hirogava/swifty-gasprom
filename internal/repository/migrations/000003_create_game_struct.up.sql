@@ -1,5 +1,3 @@
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
 CREATE TYPE "risk_type" AS ENUM (
   'crypto',
   'stocks',

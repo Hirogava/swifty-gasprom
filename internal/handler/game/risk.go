@@ -130,7 +130,7 @@ func GetRiskItem(c *gin.Context, manager *postgres.Manager) {
 		return
 	}
 
-	item, err := manager.GetRiskItem(id, c.GetString("userID"), c.Param("type"))
+	item, err := manager.GetRiskItem(id, c.GetString("userID"), c.Param("riskType"))
 	switch err {
 	case nil:
 		logger.Logger.Debug("Risk item retrieved successfully", "user_id", c.GetString("userID"), "ip", c.ClientIP())
