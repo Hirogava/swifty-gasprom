@@ -1,13 +1,13 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
-CREATE TYPE "risk_type" AS ENUM (
+CREATE TYPE IF NOT EXISTS "risk_type" AS ENUM (
   'crypto',
   'stocks',
   'bets',
   'questionable_projects'
 );
 
-CREATE TYPE "career_category" AS ENUM (
+CREATE TYPE IF NOT EXISTS "career_category" AS ENUM (
   'it_and_technology',
   'engineering_and_manufacturing',
   'medicine_and_healthcare',
@@ -15,21 +15,21 @@ CREATE TYPE "career_category" AS ENUM (
   'working_professions'
 );
 
-CREATE TYPE "news_type" AS ENUM (
+CREATE TYPE IF NOT EXISTS "news_type" AS ENUM (
   'economic',
   'political',
   'corporate',
   'useless'
 );
 
-CREATE TYPE "user_statuses" AS ENUM (
+CREATE TYPE IF NOT EXISTS "user_statuses" AS ENUM (
   'finished',
   'active',
   'burnout',
   'bankrupt'
 );
 
-CREATE TYPE "life_market_category" AS ENUM (
+CREATE TYPE IF NOT EXISTS "life_market_category" AS ENUM (
   'entertainment_and_recreation',
   'appliances_and_gadgets',
   'gifts_and_social_interaction',

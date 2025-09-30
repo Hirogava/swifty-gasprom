@@ -1,15 +1,15 @@
-CREATE TYPE "statuses" AS ENUM (
+CREATE TYPE IF NOT EXISTS "statuses" AS ENUM (
   'expired',
   'pending',
   'claimed'
 );
 
-CREATE TYPE "bank_product_type" AS ENUM (
+CREATE TYPE IF NOT EXISTS "bank_product_type" AS ENUM (
   'credit_card',
   'debit_card'
 );
 
-CREATE TYPE "bonus_type" AS ENUM (
+CREATE TYPE IF NOT EXISTS "bonus_type" AS ENUM (
   'cashback',
   'discount'
 );
