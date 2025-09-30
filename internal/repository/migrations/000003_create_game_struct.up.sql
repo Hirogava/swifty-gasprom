@@ -178,8 +178,6 @@ COMMENT ON COLUMN "user_progress"."month" IS 'Must be 1 to 60';
 
 COMMENT ON COLUMN "current_progress_news"."month" IS 'Must be 1 to 60';
 
-ALTER TABLE "careers" ADD FOREIGN KEY ("field_id") REFERENCES "career_fields" ("id");
-
 ALTER TABLE "user_career" ADD FOREIGN KEY ("career_id") REFERENCES "careers" ("id");
 
 ALTER TABLE "user_career" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("id");
@@ -189,8 +187,6 @@ ALTER TABLE "scenarios" ADD FOREIGN KEY ("crypto_category") REFERENCES "crypto" 
 ALTER TABLE "risk" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("id");
 
 ALTER TABLE "risk" ADD FOREIGN KEY ("scenario_id") REFERENCES "scenarios" ("id");
-
-ALTER TABLE "risk" ADD FOREIGN KEY ("crypto_category") REFERENCES "crypto" ("id");
 
 ALTER TABLE "news" ADD FOREIGN KEY ("crypto_category") REFERENCES "crypto" ("id");
 
