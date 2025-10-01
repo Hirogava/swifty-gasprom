@@ -1,11 +1,11 @@
 import '../../../../../routing/routers.dart';
 
 enum NavItem {
-  work(Routers.work, 'assets/icons/work.svg', 'Работа'),
-  risk(Routers.risk, 'assets/icons/risks.svg', 'Риск'),
-  home(Routers.home, 'assets/icons/home.svg', 'Главная'),
-  news(Routers.news, 'assets/icons/news.svg', 'Новости'),
-  life(Routers.life, 'assets/icons/life.svg', 'Жизнь');
+  work(Routers.work, 'assets/nav_icons/work.svg', 'Работа'),
+  risk(Routers.risk, 'assets/nav_icons/risks.svg', 'Риск'),
+  home(Routers.home, 'assets/nav_icons/home.svg', 'Главная'),
+  news(Routers.news, 'assets/nav_icons/news.svg', 'Новости'),
+  life(Routers.life, 'assets/nav_icons/life.svg', 'Жизнь');
 
   final String route;
   final String assetPath;

@@ -4,19 +4,23 @@ import 'colors.dart';
 abstract class AppFontWeights {
   static const FontWeight bolt = FontWeight.bold;
   static const FontWeight bolt500 = FontWeight.w500;
-  static const FontWeight bolt400 = FontWeight.w400;
+  static const FontWeight normal = FontWeight.w400;
   static const FontWeight bolt600 = FontWeight.w600;
+  static const FontWeight bolt300 = FontWeight.w300;
 }
 
 abstract class AppFontSizes {
   static const double size40 = 40;
   static const double size32 = 32;
   static const double size26 = 26;
+  static const double size24 = 24;
   static const double size22 = 22;
   static const double size20 = 20;
   static const double size16 = 16;
   static const double size14 = 14;
+  static const double size13 = 13;
   static const double size12 = 12;
+  static const double size11 = 11;
 }
 
 abstract class AppFontStyles {}
@@ -33,5 +37,31 @@ abstract class AppTextStyles {
     fontSize: AppFontSizes.size40,
     fontWeight: AppFontWeights.bolt,
     letterSpacing: 10,
+  );
+
+  static const TextStyle style3 = TextStyle(
+    color: AppColors.white,
+    fontSize: AppFontSizes.size24,
+  );
+
+  static const TextStyle style4 = TextStyle(
+    color: AppColors.white,
+    fontSize: AppFontSizes.size16,
+    fontWeight: AppFontWeights.bolt,
+  );
+
+  static const TextStyle style5 = TextStyle(
+    color: AppColors.white,
+    fontSize: AppFontSizes.size13,
+  );
+
+  static const TextStyle style6 = TextStyle(
+    color: AppColors.green,
+    fontSize: AppFontSizes.size13,
+  );
+
+  static const TextStyle style7 = TextStyle(
+    color: AppColors.white,
+    fontSize: AppFontSizes.size11,
   );
 }

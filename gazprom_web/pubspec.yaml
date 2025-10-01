@@ -41,6 +41,8 @@ dependencies:
   cupertino_icons: ^1.0.8
   uuid: ^4.0.0
   freezed_annotation: ^2.4.1
+  firebase_core: ^4.1.0
+  google_fonts: ^6.2.1
 
 dev_dependencies:
   flutter_test:
@@ -66,7 +68,9 @@ flutter:
   # the material Icons class.
   uses-material-design: true
   assets:
-    - assets/icons/
+    - assets/nav_icons/
+    - assets/stock_market_icons/
+    - assets/other/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../core/themes/colors.dart';
 import '../../core/themes/theme.dart';
+import '../../core/ui/svg_picture_widget.dart';
 
 class CardWidget extends StatelessWidget {
   final String balance;
@@ -15,7 +15,7 @@ class CardWidget extends StatelessWidget {
       width: 325,
       height: 210,
       decoration: BoxDecoration(
-        gradient: AppColors.blackGradient,
+        gradient: AppColors.blackGradient1,
         borderRadius: BorderRadius.circular(15),
         boxShadow: [
           BoxShadow(
@@ -29,12 +29,7 @@ class CardWidget extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SvgPicture.asset(
-            'assets/icons/card_logo.svg',
-            width: 216,
-            height: 31,
-            colorFilter: ColorFilter.mode(AppColors.white, BlendMode.srcIn),
-          ),
+          SvgPictureWidget(path: 'assets/other/card_logo.svg', width: 216, height: 31, color: AppColors.white),
           SizedBox(height: 20),
           Text('БАЛАНС', style: AppTextStyles.style1),
           Text('$balance РУБ', style: AppTextStyles.style1),

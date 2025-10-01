@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:gazprom_web/ui/life/widgets/life_screen.dart';
 import 'package:gazprom_web/ui/news/widgets/news_screen.dart';
 import 'package:gazprom_web/ui/risk/widgets/risk_screen.dart';
+import 'package:gazprom_web/ui/start/widgets/init_screen.dart';
+import 'package:gazprom_web/ui/start/widgets/login_screen.dart';
+import 'package:gazprom_web/ui/start/widgets/welcome_screen.dart';
 import 'package:gazprom_web/ui/work/widgets/work_screen.dart';
 import 'package:go_router/go_router.dart';
 
@@ -48,6 +51,24 @@ final GoRouter router = GoRouter(
           },
         ),
       ],
+    ),
+    GoRoute(
+      path: Routers.auth,
+      builder: (BuildContext context, GoRouterState state) {
+        return const InitScreen();
+      },
+    ),
+    GoRoute(
+      path: Routers.welcome,
+      builder: (BuildContext context, GoRouterState state) {
+        return const WelcomeScreen();
+      },
+    ),
+    GoRoute(
+      path: Routers.login,
+      builder: (BuildContext context, GoRouterState state) {
+        return const LoginScreen();
+      },
     ),
   ],
 );

@@ -17,34 +17,32 @@ class CustomNavigationBar extends StatefulWidget {
 class _CustomNavigationBarState extends State<CustomNavigationBar> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          Positioned.fill(child: widget.child),
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: Container(
+    return Background(
+      child: Scaffold(
+        backgroundColor: AppColors.transparent,
+        body: Column(
+          children: [
+            Expanded(child: widget.child),
+            Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
               decoration: BoxDecoration(
-                color: AppColors.blue2,
+                color: AppColors.transparent,
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(30),
                   topRight: Radius.circular(30),
                 ),
-                border: Border(
-                  top: BorderSide(color: AppColors.white, width: 2),
-                ),
+                border: Border(top: BorderSide(color: AppColors.white, width: 2)),
               ),
               child: Row(
                 children: [
-                  ...NavItem.values.map((item) => Expanded(child: NavItemWidget(item: item))),
+                  ...NavItem.values.map(
+                    (item) => Expanded(child: NavItemWidget(item: item)),
+                  ),
                 ],
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -76,18 +74,15 @@ class NavItemWidget extends StatelessWidget {
                 BlendMode.srcIn,
               ),
             ),
-            
-              const SizedBox(height: 8),
-              Text(
-                item.label,
-                style: TextStyle(
-                  color: isSelected
-                      ? AppColors.white
-                      : AppColors.unselectedItem,
-                ),
+
+            const SizedBox(height: 8),
+            Text(
+              item.label,
+              style: TextStyle(
+                color: isSelected ? AppColors.white : AppColors.unselectedItem,
               ),
-            ],
-          
+            ),
+          ],
         ),
       ),
     );
