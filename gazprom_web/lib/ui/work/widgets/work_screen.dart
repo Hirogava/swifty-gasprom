@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gazprom_web/providers/current_user_provider.dart';
 import 'package:gazprom_web/ui/core/themes/theme.dart';
 import 'package:gazprom_web/ui/core/ui/universal_container.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../../domain/models/position.dart';
 import '../../../domain/models/user.dart';
@@ -17,20 +18,28 @@ class WorkScreen extends ConsumerStatefulWidget {
 }
 
 class _WorkScreenState extends ConsumerState<WorkScreen> {
-  WorkArea? _selectedArea; // выбранная сфера
-  bool _choosing = false; // режим выбора работы?
+  WorkArea? _selectedArea;
+  bool _choosing = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+          title: Text(
+            'Работа',
+            style: GoogleFonts.roboto(fontSize: 24, color: AppColors.white),
+          ),
+          backgroundColor: AppColors.transparent,
+          shape: const Border(bottom: BorderSide(color: Colors.white)),
+        ),
       backgroundColor: AppColors.transparent,
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 40),
         child: !_choosing
-            ? _buildStatus(ref) // статус по умолчанию
+            ? _buildStatus(ref)
             : (_selectedArea == null
-                  ? _buildWorkAreasView() // список сфер
-                  : _buildPositionsView(_selectedArea!)), // список позиций
+                  ? _buildWorkAreasView()
+                  : _buildPositionsView(_selectedArea!)),
       ),
     );
   }
@@ -64,8 +73,8 @@ class _WorkScreenState extends ConsumerState<WorkScreen> {
           isButton: true,
           onTap: () {
             setState(() {
-              _choosing = true; // включаем режим выбора
-              _selectedArea = null; // пока ни одна сфера не выбрана
+              _choosing = true;
+              _selectedArea = null;
             });
           },
           children: [
@@ -87,7 +96,7 @@ class _WorkScreenState extends ConsumerState<WorkScreen> {
           child: TextButton.icon(
             onPressed: () {
               setState(() {
-                _choosing = false; // назад к статусу
+                _choosing = false;
               });
             },
             icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -104,7 +113,7 @@ class _WorkScreenState extends ConsumerState<WorkScreen> {
                 isButton: true,
                 onTap: () {
                   setState(() {
-                    _selectedArea = area; // выбрали сферу
+                    _selectedArea = area;
                   });
                 },
                 children: [Text(area.title, style: AppTextStyles.style3)],
@@ -128,7 +137,7 @@ class _WorkScreenState extends ConsumerState<WorkScreen> {
           child: TextButton.icon(
             onPressed: () {
               setState(() {
-                _selectedArea = null; // назад к списку сфер
+                _selectedArea = null;
               });
             },
             icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -151,14 +160,14 @@ class _WorkScreenState extends ConsumerState<WorkScreen> {
                       bankUserId: user.bankUserId,
                       accessToken: user.accessToken,
                       refreshToken: user.refreshToken,
-                      position: pos, // выбранная работа
+                      position: pos,
                       happiness: user.happiness,
                     );
                   });
 
                   setState(() {
-                    _choosing = false; // выходим из режима выбора
-                    _selectedArea = null; // сбрасываем выбранную область
+                    _choosing = false;
+                    _selectedArea = null;
                   });
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('Вы выбрали: ${pos.title}')),

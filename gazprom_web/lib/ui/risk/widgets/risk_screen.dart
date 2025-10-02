@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gazprom_web/ui/core/ui/button_widget.dart';
 import 'package:gazprom_web/ui/core/ui/universal_container.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/themes/colors.dart';
 import '../../core/themes/theme.dart';
@@ -14,14 +15,20 @@ class RiskScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          'Риски',
+          style: GoogleFonts.roboto(fontSize: 24, color: AppColors.white),
+        ),
+        backgroundColor: AppColors.transparent,
+        shape: const Border(bottom: BorderSide(color: Colors.white)),
+      ),
       backgroundColor: AppColors.transparent,
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 40),
           child: Column(
             children: [
-              Center(child: Text('Риски', style: AppTextStyles.style3)),
-              SizedBox(height: 10),
               UniversalContainer(
                 width: double.infinity,
                 borderRadius: 34,
