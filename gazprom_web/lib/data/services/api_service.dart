@@ -60,15 +60,40 @@ class ApiService {
     }
   }
 
-  Future<Map<String, dynamic>> refreshToken(String refreshToken) async {
+  Future<String> logout(String accessToken) async {
     try {
-      final response = await dio.post(
-        '/refresh_token',
-        data: {'token': refreshToken},
-      );
-      return response.data as Map<String, dynamic>;
-    } on DioException catch (e) {
-      throw Exception('Failed to refresh token: ${e.message}');
+      final response = await dio.post('logout', data: {'logout': accessToken});
+
+      final data = response.data['user'];
+
+      if (response.statusCode == 200) {
+        dev.log('Успешно: ${response.data}');
+        return data;
+      } else {
+        throw ApiException(
+          'Invalid status code',
+          statusCode: response.statusCode,
+        );
+      }
+    } on DioException catch (e, s) {
+      dev.log('Dio error', error: e, stackTrace: s);
+
+      if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout) {
+        throw const ApiTimeoutException();
+      }
+
+      if (e.response != null) {
+        throw ApiException(
+          'Server error: ${e.response?.statusMessage ?? 'Unknown'}',
+          statusCode: e.response?.statusCode,
+        );
+      }
+
+      throw NetworkException('Network error: ${e.message}');
+    } catch (e, s) {
+      dev.log('Unexpected API error', error: e, stackTrace: s);
+      throw const NetworkException('Unexpected network error');
     }
   }
 

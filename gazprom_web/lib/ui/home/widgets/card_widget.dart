@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/themes/colors.dart';
 import '../../core/themes/theme.dart';
@@ -31,10 +32,10 @@ class CardWidget extends StatelessWidget {
         children: [
           SvgPictureWidget(path: 'assets/other/card_logo.svg', width: 216, height: 31, color: AppColors.white),
           SizedBox(height: 20),
-          Text('БАЛАНС', style: AppTextStyles.style1),
-          Text('$balance РУБ', style: AppTextStyles.style1),
+          Text('БАЛАНС', style: GoogleFonts.roboto(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.white),),
+          Text('$balance РУБ', style: GoogleFonts.roboto(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.white),),
           Spacer(),
-          Center(child: Text('SUPREME', style: AppTextStyles.style2)),
+          Center(child: Text('SUPREME', style: GoogleFonts.roboto(fontSize: 40, fontWeight: FontWeight.bold, letterSpacing: 15, color: AppColors.white26),)),
         ],
       ),
     );

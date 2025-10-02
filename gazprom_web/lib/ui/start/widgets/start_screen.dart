@@ -64,7 +64,7 @@ class StartScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 20),
                     ButtonWidget(
-                      buttonText: 'Начать',
+                      buttonText: 'Алеша',
                       textColor: AppColors.black,
                       backgroundColor: AppColors.transparent,
                       borderColor: AppColors.black,
